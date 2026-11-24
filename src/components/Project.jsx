@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import {isDemoProject} from '../data/demoProjects.js';
+import {projectPath} from '../data/publicUrls.js';
 export {isDemoProject} from '../data/demoProjects.js';
 import {PublicAsset} from './AssetUrlContext';
 
@@ -15,7 +16,7 @@ export function ProjectVisual({
   </div>}</PublicAsset>;
 }
 export function ProjectCard({p}) {
-  return <a className="project-card" href={'#/projeto/' + encodeURIComponent(p.id)}>
+  return <a className="project-card" href={projectPath(p.id)}>
     <ProjectVisual project={p} />
     <div className="project-meta">
       <div><span className="eyebrow">{p.category}</span>

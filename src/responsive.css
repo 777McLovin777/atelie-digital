@@ -1,5 +1,14 @@
 /* Ajustes compartilhados para toque, conteúdo longo e teclado virtual. */
 button,a,input,textarea,select{touch-action:manipulation}
+.app{overflow:visible;overflow-x:clip}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid #254a48;outline-offset:3px;box-shadow:0 0 0 6px #f8f4eb}
+@media (hover:hover) and (pointer:fine){
+  html{scrollbar-color:var(--teal) #263d3d12;scrollbar-width:thin}
+  html::-webkit-scrollbar{width:8px;height:8px}
+  html::-webkit-scrollbar-track{background:#263d3d0a;border-radius:999px}
+  html::-webkit-scrollbar-thumb{background:var(--teal);border:2px solid transparent;border-radius:999px;background-clip:content-box}
+  html::-webkit-scrollbar-thumb:hover{background:var(--rust);background-clip:content-box}
+}
 .app h1,.app h2,.app h3,.project-edit-text,.notice,.storage-error,.save-notice,.media-item{overflow-wrap:anywhere}
 .wordmark{min-width:0;max-width:100%;overflow-wrap:anywhere;text-align:left}
 .nav button,.menu-toggle,.project-edit-row>button,.modal-head button,.footer-right a,.footer-right>button{min-height:44px}
@@ -111,4 +120,30 @@ button,a,input,textarea,select{touch-action:manipulation}
   line-height: 1.05;
   overflow-wrap: anywhere;
   text-wrap: balance;
+}
+
+@media (min-width: 1024px) and (min-height: 650px) {
+  .app { display: flex; flex-direction: column; min-height: 100vh; min-height: 100svh; }
+  .topbar { flex: 0 0 auto; }
+  #conteudo { flex: 1 0 auto; min-width: 0; }
+  .footer { margin-top: auto; padding-block: clamp(.65rem, 1.3vh, 1rem) .5rem; gap: .55rem; }
+  .footer-bottom { padding-top: .55rem; }
+  .simple-page:not(.services-page) { display: flex; flex-direction: column; min-height: 0; padding-block: clamp(1rem, 2.2vh, 2rem); }
+  .simple-page:not(.services-page) > h1 { font-size: clamp(2.1rem, 4.6vh, 3.7rem); line-height: 1.08; margin-bottom: clamp(.45rem, 1vh, .8rem); }
+  .simple-page:not(.services-page) > p { font-size: clamp(.95rem, 1.6vh, 1.15rem); line-height: 1.5; margin-bottom: clamp(.5rem, 1vh, .85rem); }
+  .simple-page .statement { margin-top: clamp(.85rem, 2.2vh, 1.7rem); padding: clamp(1.2rem, 3vh, 2.5rem); font-size: clamp(1.7rem, 3.8vh, 3.3rem); }
+  .simple-page:not(.services-page) > .pill { align-self: flex-start; margin-top: auto; }
+  .contact-page .contact-channels { gap: .5rem; margin: .7rem 0 0; }
+  .contact-page .contact-channel { min-height: 48px; padding: .65rem 1rem; }
+  .services-page { min-height: 0; padding: clamp(.8rem, 1.8vh, 1.5rem) 6.5%; }
+  .services-page > .services { width: 100%; margin: 0; }
+  .services-page .section-top { margin: 0 0 clamp(.5rem, 1vh, .85rem); }
+  .services-page .section-top h1 { font-size: clamp(2rem, 4.3vh, 3.5rem); line-height: 1.04; margin: 0; }
+  .services-page .service-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(.5rem, 1vw, 1rem); }
+  .services-page .service-card { padding: clamp(.7rem, 1.5vh, 1.25rem); }
+  .services-page .service-card h2 { font-size: clamp(1rem, 1.35vw, 1.25rem); line-height: 1.2; margin: clamp(.5rem, 1.2vh, .9rem) 0 .45rem; }
+  .services-page .service-card p { font-size: clamp(.78rem, 1.35vh, .95rem); line-height: 1.45; }
+  .services-page .service-card p + p { margin-top: .55rem; }
+  .services-page .service-card .service-contact { margin-top: .35rem; padding: .3rem 0; }
+  .services-page .service-availability { margin-top: .75rem; }
 }

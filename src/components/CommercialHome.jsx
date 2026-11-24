@@ -1,17 +1,10 @@
 import React from 'react';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { DEFAULT_PROFILE_COPY } from '../data/profileCopy.js';
-import { CONTACT_PENDING, quoteHref } from '../data/contact';
-import { Services } from './Experience';
+import { quoteHref } from '../data/contact';
+import { PUBLIC_PATHS } from '../data/publicUrls.js';
 import { ProjectCard } from './Project';
 import './commercial-home.css';
-
-const processSteps = [
-  ['Descoberta', 'Entendemos o negócio, as necessidades e os objetivos.'],
-  ['Planejamento', 'Estruturamos a solução e definimos a experiência.'],
-  ['Desenvolvimento', 'Transformamos o planejamento em um produto funcional.'],
-  ['Refinamento e entrega', 'Testamos, ajustamos e preparamos o resultado para utilização.']
-];
 
 export default function CommercialHome({ data }) {
   const { profile, projects, services } = data;
@@ -31,11 +24,12 @@ export default function CommercialHome({ data }) {
         <p className="hero-offer">Sites, sistemas e automações para transformar ideias em soluções digitais.</p>
         {description && <p>{description}</p>}
         <div className="hero-actions">
-          <a className="pill dark" href={contact || '#/servicos'}>
+          <a className="pill dark" href={contact || PUBLIC_PATHS.services}>
             {contact ? 'Solicitar orçamento' : 'Conheça nossas soluções'} <ArrowUpRight size={18} aria-hidden="true" />
           </a>
-          <a className="text-button" href="#/projetos">Explorar projetos <ArrowRight size={18} aria-hidden="true" /></a>
+          <a className="text-button" href={PUBLIC_PATHS.projects}>Explorar projetos <ArrowRight size={18} aria-hidden="true" /></a>
         </div>
+        <p className="home-intro">Um estúdio independente que combina design e desenvolvimento para negócios, profissionais e criadores.</p>
       </div>
       <div className="hero-art" aria-hidden="true">
         <div className="art-glass"><strong>Entre a ideia<br />e o extraordinário.</strong></div>
@@ -43,38 +37,29 @@ export default function CommercialHome({ data }) {
         <div className="art-star">✳</div>
       </div>
     </section>
-    <Services services={services} email={profile.email} />
+    <section className="home-services" aria-labelledby="home-services-title">
+      <div className="section-top">
+        <h2 id="home-services-title">Nossas soluções</h2>
+        <a className="text-button" href={PUBLIC_PATHS.services}>Ver serviços <ArrowRight size={17} aria-hidden="true" /></a>
+      </div>
+      <ul className="service-summary">{services.map((service, index) => <li key={service.id}>
+        <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span><strong>{service.title}</strong>
+      </li>)}</ul>
+    </section>
     <section className="featured" aria-labelledby="selected-title">
       <div className="section-top">
-        <div><h2 id="selected-title">Projetos selecionados</h2><p>Veja como aplicamos design e tecnologia em diferentes tipos de solução.</p></div>
-        <a className="text-button" href="#/projetos">Ver o acervo inteiro <ArrowUpRight size={18} aria-hidden="true" /></a>
+        <div><h2 id="selected-title">Projetos selecionados</h2><p>Dois exemplos demonstrativos de design e tecnologia.</p></div>
+        <a className="text-button" href={PUBLIC_PATHS.projects}>Ver todos os projetos <ArrowUpRight size={18} aria-hidden="true" /></a>
       </div>
       {selected.length ? <div className="featured-grid">
         {selected.map(project => <ProjectCard p={project} key={project.id} />)}
       </div> : <p>Os projetos publicados aparecerão aqui.</p>}
     </section>
-    <section className="home-process" aria-labelledby="process-title">
-      <h2 id="process-title">Nosso processo de trabalho</h2>
-      <ol>{processSteps.map(([title, detail], index) => <li key={title}>
-        <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
-        <h3>{title}</h3><p>{detail}</p>
-      </li>)}</ol>
-    </section>
-    <section className="studio-section" aria-labelledby="studio-title">
-      <div>
-        <h2 id="studio-title">Sobre o estúdio</h2>
-        <p>Unimos criatividade e tecnologia para desenvolver experiências digitais pensadas para pessoas reais.</p>
-        {profile.about && <p>{profile.about}</p>}
-        <a className="text-button" href="#/sobre">Conheça o estúdio <ArrowUpRight size={18} aria-hidden="true" /></a>
-      </div>
-      {profile.availability && <div className="studio-note"><span className="live-dot" />{profile.availability}</div>}
-    </section>
     <section className="big-cta" aria-labelledby="quote-title">
       <h2 id="quote-title">Vamos transformar sua ideia em realidade?</h2>
-      {contact ? <p>Conte o que você precisa. Vamos conversar sobre as possibilidades e encontrar um caminho para o seu projeto.</p>
-        : <p className="quote-pending">{CONTACT_PENDING}</p>}
-      <a className="pill pale" href={contact || '#/servicos'}>
-        {contact ? 'Solicitar orçamento' : 'Conheça nossas soluções'} <ArrowUpRight size={19} aria-hidden="true" />
+      <p>Escolha o canal que preferir para conversar sobre seu projeto.</p>
+      <a className="pill pale" href={PUBLIC_PATHS.contact}>
+        Ver canais de contato <ArrowUpRight size={19} aria-hidden="true" />
       </a>
       <span className="cta-star" aria-hidden="true">✳</span>
     </section>

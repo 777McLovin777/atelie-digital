@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowUpRight, Layers3, Compass, Workflow, PanelsTopLeft, Sparkles } from 'lucide-react';
 import { DEFAULT_SERVICES, SERVICE_DETAILS } from '../data/content';
 import { CONTACT_PENDING, quoteHref } from '../data/contact';
+import { PUBLIC_PATHS } from '../data/publicUrls.js';
 import {PublicAsset} from './AssetUrlContext';
 const serviceIcons = {development:PanelsTopLeft, systems:Layers3, automation:Workflow, interfaces:Sparkles};
 
@@ -30,7 +31,7 @@ export function Services({services=[], email, standalone=false}) {
     {!services.length && <p>As soluções publicadas aparecerão aqui.</p>}
     {standalone && !quoteHref(email) && <div className="service-availability">
       <p>{CONTACT_PENDING}</p>
-      <a className="text-button" href="#/projetos">Explorar projetos <ArrowUpRight size={16} aria-hidden="true" /></a>
+      <a className="text-button" href={PUBLIC_PATHS.projects}>Explorar projetos <ArrowUpRight size={16} aria-hidden="true" /></a>
     </div>}
   </section>;
 }

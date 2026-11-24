@@ -4,6 +4,8 @@ import {fileURLToPath} from 'node:url';
 import react from '@vitejs/plugin-react';
 import {defineConfig} from 'vite';
 import {sensitiveFileProtection} from './scripts/lib/file-security.mjs';
+import {routeDocuments} from './src/data/publicUrls.js';
+import {showcase} from './vitrine/content.js';
 
 const project = dirname(fileURLToPath(import.meta.url));
 const root = resolve(project, 'vitrine');
@@ -11,12 +13,23 @@ const root = resolve(project, 'vitrine');
 function showcaseFiles() {
   return {
     name: 'atelier-vitrine-files',
-    generateBundle() {
+    enforce: 'post',
+    generateBundle(_options, bundle) {
       for (const id of this.getModuleIds()) {
         const file = id.replaceAll('\\', '/').split('?')[0];
         if (/(?:\/node_modules\/@supabase\/|\/src\/(?:main\.jsx$|hooks\/|data\/(?:auth|cloudRepository|config|initial|media|mediaPolicy|migration|repository|saveIntent|supabase)\.js$|components\/(?:Admin\w*|EditorDialog|EditorialFields|MediaManager|MigrationTools|ProjectEditor|PublicExperience)\.jsx$))/.test(file)) {
           this.error('Uma dependência da aplicação completa entrou no grafo da vitrine.');
         }
+      }
+      const index = bundle['index.html'];
+      if (!index || index.type !== 'asset') this.error('Documento principal ausente do pacote.');
+      const rootHtml = String(index.source);
+      const baseTitle = '<title>Ateliê Digital · Estúdio de soluções digitais</title>';
+      for (const page of routeDocuments(showcase.projects)) {
+        const title = page.title.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+        const source = rootHtml.replace(baseTitle, `<title>${title}</title>`);
+        if (source === rootHtml) this.error('Título base ausente no documento da vitrine.');
+        this.emitFile({type:'asset', fileName:page.file, source});
       }
       for (const fileName of ['_headers', '404.html']) {
         this.emitFile({type:'asset', fileName, source:readFileSync(resolve(root, fileName), 'utf8')});
