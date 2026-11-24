@@ -1,0 +1,1 @@
+export const DEFAULT_PROFILE_COPY={headline:'Ideias que saem do papel e ganham vida.',description:'Criamos experiências digitais com personalidade, intenção e um pouco de ousadia. Da primeira ideia à última interação.'};
