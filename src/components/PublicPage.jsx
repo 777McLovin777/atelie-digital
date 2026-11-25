@@ -31,6 +31,48 @@ function ProjectDetails({project}) {
   </main>;
 }
 
+function PeDeMocaCaseStudy({project}) {
+  const demoUrl = safeUrl(project.demoUrl);
+  const repositoryUrl = safeUrl(project.repositoryUrl);
+  return <main id="conteudo" tabIndex={-1} className="detail case-study">
+    <a className="back" href={PUBLIC_PATHS.projects}><ArrowLeft size={17} aria-hidden="true" /> Voltar aos projetos</a>
+    <span className="eyebrow">ESTUDO DE CASO / {project.year}</span>
+    <h1>{project.name} — Plataforma digital para confeitaria artesanal</h1>
+    <p className="case-study-intro">Aplicação web de delivery e presença digital que reúne identidade visual, catálogo de produtos e uma experiência orientada à preparação do pedido.</p>
+    <ProjectVisual project={project} large />
+    <div className="case-study-actions">
+      {demoUrl && <a className="pill dark" href={demoUrl} target="_blank" rel="noopener noreferrer">Visualizar projeto <ArrowUpRight size={17} aria-hidden="true" /></a>}
+      {repositoryUrl && <a className="pill outline" href={repositoryUrl} target="_blank" rel="noopener noreferrer">Repositório GitHub <ArrowUpRight size={17} aria-hidden="true" /></a>}
+    </div>
+    <div className="case-study-grid">
+      <section className="case-study-card" aria-labelledby="pdm-challenge">
+        <span className="eyebrow">PROPOSTA</span>
+        <h2 id="pdm-challenge">O desafio</h2>
+        <p>Organizar a apresentação dos produtos e facilitar a navegação entre a descoberta dos doces e a preparação de um pedido.</p>
+      </section>
+      <section className="case-study-card" aria-labelledby="pdm-solution">
+        <span className="eyebrow">INTERFACE</span>
+        <h2 id="pdm-solution">A solução apresentada</h2>
+        <ul>
+          <li>Identidade visual própria e páginas adaptadas a desktop e celular.</li>
+          <li>Catálogo por categorias, com imagens, descrições e preços.</li>
+          <li>Carrinho com quantidades e opção de adicional visível na captura.</li>
+          <li>Telas de acesso e criação de conta.</li>
+        </ul>
+      </section>
+    </div>
+    <section className="case-study-status" aria-labelledby="pdm-status">
+      <div><span className="eyebrow">ESTÁGIO</span><h2 id="pdm-status">Demonstração e homologação</h2></div>
+      <p>As imagens registram interfaces do projeto. A demonstração pública pode ser explorada, mas autenticação, operação do pedido e integrações de pagamento, incluindo PIX, não são apresentadas aqui como homologadas ou em produção.</p>
+    </section>
+    <section className="case-study-tools" aria-label="Tecnologias confirmadas">
+      <span className="eyebrow">TECNOLOGIAS CONFIRMADAS NO REPOSITÓRIO</span>
+      <div className="tags"><span>React</span><span>Vite</span></div>
+    </section>
+    <ProjectGallery project={project} />
+  </main>;
+}
+
 function ProjectCollection({projects, filter, setFilter}) {
   const categories = [...new Set(projects.map(project => project.category))];
   const visible = projects.filter(project => filter === 'Todos' || project.category === filter);
@@ -47,7 +89,7 @@ function ProjectCollection({projects, filter, setFilter}) {
 }
 
 export default function PublicPage({detailId, detail, route, data, filter, setFilter}) {
-  if (detailId) return detail ? <ProjectDetails project={detail} /> :
+  if (detailId) return detail ? detail.id === 'pe-de-moca' ? <PeDeMocaCaseStudy project={detail} /> : <ProjectDetails project={detail} /> :
     <main id="conteudo" tabIndex={-1} className="missing"><h1>Projeto não encontrado.</h1><a className="pill dark" href={PUBLIC_PATHS.projects}>Ver projetos</a></main>;
   if (route === PUBLIC_PATHS.projects) return <ProjectCollection projects={data.projects} filter={filter} setFilter={setFilter} />;
   if (route === PUBLIC_PATHS.services) return <main id="conteudo" tabIndex={-1} className="simple-page services-page">

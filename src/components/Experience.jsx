@@ -1,9 +1,8 @@
-import React from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import { ArrowUpRight, Layers3, Compass, Workflow, PanelsTopLeft } from 'lucide-react';
 import { DEFAULT_SERVICES, SERVICE_DETAILS } from '../data/content';
 import { CONTACT_PENDING, quoteHref } from '../data/contact';
 import { PUBLIC_PATHS } from '../data/publicUrls.js';
-import {PublicAsset} from './AssetUrlContext';
 const serviceIcons = {development:PanelsTopLeft, systems:Layers3, automation:Workflow, interfaces:Compass};
 
 export function Services({services=[], email, standalone=false}) {
@@ -40,14 +39,69 @@ export function ProjectGallery({
 }) {
   const images = (project.gallery || []).filter(Boolean);
   if (!images.length) return null;
-  return <section className="project-gallery" aria-label="Galeria do projeto"><h2>Outros pontos de vista.</h2><div>{images.map((source,i)=><GalleryImage key={source+i} {...{source,project,i}}/>)}</div></section>;
+  return <ProjectGalleryView images={images} project={project} />;
 }
-function GalleryImage({source,project,i}) {
-  return <PublicAsset source={source}>{url=><figure>
-    <div className="gallery-media">
-      {url ? <img src={url} loading="lazy" decoding="async" alt={`${project.name} — imagem ${i+1}`} />
-        : <p className="asset-placeholder">Imagem indisponível</p>}
+
+function ProjectGalleryView({images, project}) {
+  const [activeIndex, setActiveIndex] = useState(null);
+  const dialogRef = useRef(null);
+  const closeRef = useRef(null);
+  const triggerRef = useRef(null);
+  const activeImage = activeIndex === null ? null : images[activeIndex];
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (activeIndex === null || !dialog) return;
+    if (!dialog.open) {
+      dialog.showModal();
+      closeRef.current?.focus();
+    }
+  }, [activeIndex]);
+
+  function closePreview() {
+    if (dialogRef.current?.open) dialogRef.current.close();
+  }
+
+  function moveImage(delta) {
+    setActiveIndex(index => (index + delta + images.length) % images.length);
+  }
+
+  function handleDialogKeyDown(event) {
+    if (event.key === 'ArrowRight') { event.preventDefault(); moveImage(1); }
+    if (event.key === 'ArrowLeft') { event.preventDefault(); moveImage(-1); }
+  }
+
+  function handleDialogClose() {
+    setActiveIndex(null);
+    triggerRef.current?.focus({preventScroll:true});
+  }
+
+  return <section className="project-gallery" aria-labelledby="project-gallery-title">
+    <div className="project-gallery-heading">
+      <div><span className="eyebrow">INTERFACES</span><h2 id="project-gallery-title">Galeria de telas</h2></div>
+      <p>Capturas do projeto em diferentes páginas e tamanhos de tela. Selecione uma imagem para ampliar.</p>
     </div>
-    <figcaption>Imagem {i+1} · {project.name}</figcaption>
-  </figure>}</PublicAsset>;
+    <div className="project-gallery-grid">{images.map((image, index) => <figure className={image.portrait ? 'portrait-capture' : ''} key={image.src}>
+      <button className="gallery-image-button" type="button" aria-label={`Ampliar imagem ${index + 1}: ${image.caption}`}
+        onClick={event => { triggerRef.current = event.currentTarget; setActiveIndex(index); }}>
+        <span className="gallery-media"><img src={image.src} width={image.width} height={image.height} loading="lazy" decoding="async" alt={image.alt} /></span>
+      </button>
+      <figcaption><span>{image.caption}</span><span className="gallery-enlarge-hint">Ampliar</span></figcaption>
+    </figure>)}</div>
+    <dialog ref={dialogRef} className="project-image-dialog" aria-label={`Visualização de imagens do projeto ${project.name}`}
+      onClose={handleDialogClose} onKeyDown={handleDialogKeyDown}>
+      {activeImage && <div className="project-image-preview">
+        <div className="project-image-toolbar">
+          <p aria-live="polite">{activeImage.caption} · {activeIndex + 1} de {images.length}</p>
+          <button ref={closeRef} type="button" className="gallery-close" onClick={closePreview} aria-label="Fechar imagem ampliada">Fechar <span aria-hidden="true">×</span></button>
+        </div>
+        <div className="project-image-stage">
+          <button type="button" className="gallery-step" onClick={() => moveImage(-1)} aria-label="Imagem anterior">‹</button>
+          <img src={activeImage.src} width={activeImage.width} height={activeImage.height} alt={activeImage.alt} decoding="async" />
+          <button type="button" className="gallery-step" onClick={() => moveImage(1)} aria-label="Próxima imagem">›</button>
+        </div>
+        <p className="project-image-caption">Use as setas do teclado para navegar pelas imagens. Pressione Escape para fechar.</p>
+      </div>}
+    </dialog>
+  </section>;
 }

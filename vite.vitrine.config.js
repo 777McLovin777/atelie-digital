@@ -12,6 +12,10 @@ const root = resolve(project, 'vitrine');
 const contactIconFiles = ['gmail.svg', 'github.svg', 'whatsapp.svg'];
 const faviconFiles = ['favicon.ico', 'favicon-32.png', 'apple-touch-icon.png'];
 const openGraphImageFile = 'og-image.jpg';
+const projectImageFiles = [
+  'home-desktop.webp', 'home-mobile.webp', 'catalog-capture.webp', 'catalog-mobile.webp',
+  'cart-desktop.webp', 'account-desktop.webp', 'account-mobile.webp',
+];
 
 function escapeHtml(value) {
   return String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
@@ -70,6 +74,10 @@ function showcaseFiles() {
         this.emitFile({type:'asset', fileName, source:readFileSync(resolve(root, 'icons', fileName))});
       }
       this.emitFile({type:'asset', fileName:openGraphImageFile, source:readFileSync(resolve(root, openGraphImageFile))});
+      for (const fileName of projectImageFiles) {
+        this.emitFile({type:'asset', fileName:`assets/projects/pe-de-moca/${fileName}`,
+          source:readFileSync(resolve(project, 'src', 'assets', 'projects', 'pe-de-moca', fileName))});
+      }
     },
   };
 }

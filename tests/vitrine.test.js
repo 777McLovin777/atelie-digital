@@ -29,7 +29,17 @@ test('vitrine has four services, disclosed samples and the authorized contact ch
   assert.equal(showcase.projects.length, 2);
   assert.deepEqual(showcase.projects.map(project => project.id), ['pe-de-moca', 'laboratorio']);
   assert.deepEqual([...new Set(showcase.projects.map(project => project.category))], ['Web', 'Experimento']);
-  assert.ok(showcase.projects.every(p => isDemoProject(p) && !p.link && !p.image && !p.gallery.length && !p.results));
+  assert.ok(showcase.projects.every(p => isDemoProject(p) && !p.link && !p.results));
+  const peDeMoca = showcase.projects[0];
+  const laboratorio = showcase.projects[1];
+  assert.equal(peDeMoca.image, '/assets/projects/pe-de-moca/home-desktop.webp');
+  assert.equal(peDeMoca.gallery.length, 7);
+  assert.ok(peDeMoca.gallery.every(image => image.src.startsWith('/assets/projects/pe-de-moca/') && image.alt && image.caption && image.width > 0 && image.height > 0));
+  assert.deepEqual(laboratorio.gallery, []);
+  assert.equal(laboratorio.image, '');
+  assert.equal(peDeMoca.demoUrl, 'https://delivery-pedemoca.pages.dev/');
+  assert.equal(peDeMoca.repositoryUrl, 'https://github.com/777McLovin777/delivery-pedemoca');
+  assert.doesNotMatch(peDeMoca.description, /vendas|clientes ativos|pagamento em produção/i);
   assert.equal(showcase.profile.email, 'leo.ateliedigital@gmail.com');
   assert.equal(showcase.profile.github, 'https://github.com/777McLovin777');
   assert.equal(showcase.profile.whatsapp, '5511910513097');
@@ -50,6 +60,32 @@ test('vitrine has four services, disclosed samples and the authorized contact ch
   assert.equal(whatsapp.pathname, '/5511910513097');
   assert.equal(whatsapp.searchParams.get('text'), WHATSAPP_INITIAL_MESSAGE);
   assert.equal(whatsappHref('123'), '');
+});
+
+test('Pé de Moça case study separates demonstrated screens from integrations pending validation', () => {
+  const page = readFileSync(new URL('../src/components/PublicPage.jsx', import.meta.url), 'utf8');
+  const gallery = readFileSync(new URL('../src/components/Experience.jsx', import.meta.url), 'utf8');
+  const model = readFileSync(new URL('../src/data/demoProjects.js', import.meta.url), 'utf8');
+  const vite = readFileSync(new URL('../vite.vitrine.config.js', import.meta.url), 'utf8');
+  const audit = readFileSync(new URL('../scripts/audit-vitrine.mjs', import.meta.url), 'utf8');
+  assert.match(page, /\{project\.name\} — Plataforma digital para confeitaria artesanal/);
+  assert.match(page, /Organizar a apresentação dos produtos/);
+  assert.match(page, /autenticação, operação do pedido e integrações de pagamento, incluindo PIX, não são apresentadas aqui como homologadas ou em produção/);
+  assert.match(page, /target="_blank" rel="noopener noreferrer"/);
+  assert.match(page, /detail\.id === 'pe-de-moca' \? <PeDeMocaCaseStudy/);
+  assert.match(gallery, /alt=\{image\.alt\}/);
+  assert.match(gallery, /aria-label=\{`Ampliar imagem/);
+  assert.match(gallery, /dialogRef\.current\.close\(\)/);
+  assert.match(gallery, /event\.key === 'ArrowRight'/);
+  assert.match(gallery, /event\.key === 'ArrowLeft'/);
+  assert.match(gallery, /triggerRef\.current\?\.focus/);
+  assert.match(gallery, /aria-live="polite"/);
+  assert.equal((model.match(/src:'\/assets\/projects\/pe-de-moca\//g) || []).length, 7);
+  assert.match(vite, /projectImageFiles = \[/);
+  assert.match(vite, /assets\/projects\/pe-de-moca\/\$\{fileName\}/);
+  assert.match(audit, /projectImageFiles\.length !== 7/);
+  assert.match(audit, /function webpDimensions\(/);
+  assert.match(audit, /projectImagesValid/);
 });
 
 test('contact links use the requested order and safe external-tab attributes', () => {

@@ -10,6 +10,6 @@ export const showcase = {
     github: 'https://github.com/777McLovin777',
     whatsapp: '5511910513097',
   },
-  projects: DEMO_PROJECTS.map(project => ({...project, gallery: []})),
+  projects: DEMO_PROJECTS.map(project => ({...project, gallery: [...(project.gallery || [])]})),
   services: DEFAULT_SERVICES,
 };

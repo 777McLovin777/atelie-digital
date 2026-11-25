@@ -3,17 +3,16 @@ import { ArrowUpRight } from 'lucide-react';
 import {isDemoProject} from '../data/demoProjects.js';
 import {projectPath} from '../data/publicUrls.js';
 export {isDemoProject} from '../data/demoProjects.js';
-import {PublicAsset} from './AssetUrlContext';
 
 export function ProjectVisual({
   project: p,
   large = false
 }) {
-  return <PublicAsset source={p.image}>{url=>url ? <div className={'project-visual '+p.tone+(large?' visual-large':'')}><img className="project-cover" src={url} alt={'Capa de '+p.name} loading={large?'eager':'lazy'} decoding="async"/><span className="visual-corner">↗ / {p.year}</span></div> :
+  return p.image ? <div className={'project-visual '+p.tone+(large?' visual-large':'')}><img className="project-cover" src={p.image} alt={'Capa de '+p.name} loading={large?'eager':'lazy'} decoding="async"/><span className="visual-corner">↗ / {p.year}</span></div> :
     <div aria-hidden="true" className={'project-visual project-visual-fallback ' + p.tone + (large ? ' visual-large' : '')}>
     <div className="visual-orbit" /><div className="visual-square" />
     <span className="visual-word">{p.name}</span><span className="visual-corner">↗ / {p.year}</span>
-  </div>}</PublicAsset>;
+  </div>;
 }
 export function ProjectCard({p}) {
   return <a className="project-card" href={projectPath(p.id)}>

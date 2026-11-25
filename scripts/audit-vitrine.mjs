@@ -12,6 +12,16 @@ const permissions = /(?:default-src 'none'.*script-src 'self'.*connect-src 'none
 const contactIconFiles = ['gmail.svg', 'github.svg', 'whatsapp.svg'];
 const faviconFiles = ['favicon.ico', 'favicon-32.png', 'apple-touch-icon.png'];
 const openGraphImageFile = 'og-image.jpg';
+const projectImageFiles = [
+  'home-desktop.webp', 'home-mobile.webp', 'catalog-capture.webp', 'catalog-mobile.webp',
+  'cart-desktop.webp', 'account-desktop.webp', 'account-mobile.webp',
+];
+const projectImageDimensions = {
+  'home-desktop.webp': [1916, 867], 'home-mobile.webp': [810, 12771],
+  'catalog-capture.webp': [355, 870], 'catalog-mobile.webp': [810, 9319],
+  'cart-desktop.webp': [1432, 852], 'account-desktop.webp': [1697, 877],
+  'account-mobile.webp': [810, 1800],
+};
 const unsafeSvg = /<\s*(?:script|foreignObject|iframe|object|embed|image|use|animate(?:Motion|Transform)?|set|audio|video)\b|\bon[a-z0-9_-]+\s*=|\b(?:href|xlink:href|src)\s*=|\bstyle\s*=|url\s*\(|javascript:|data:/i;
 const decorativeStar = /[✳✱✻✼✽❋❊❉⁎∗＊]/u;
 
@@ -22,6 +32,13 @@ function safeContactSvg(source) {
 
 function isPng(buffer) {
   return buffer.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+}
+
+function webpDimensions(buffer) {
+  if (buffer.length < 30 || buffer.toString('ascii', 0, 4) !== 'RIFF' ||
+      buffer.toString('ascii', 8, 12) !== 'WEBP' || buffer.toString('ascii', 12, 16) !== 'VP8 ' ||
+      buffer[23] !== 0x9d || buffer[24] !== 0x01 || buffer[25] !== 0x2a) return null;
+  return {width:buffer.readUInt16LE(26) & 0x3fff, height:buffer.readUInt16LE(28) & 0x3fff};
 }
 
 function jpegDimensions(buffer) {
@@ -77,13 +94,22 @@ try {
   const bundleAssets = assets.filter(name => /^index-[\w-]+\.(?:js|css)$/.test(name));
   const portraitAssets = assets.filter(name => /^leonardo-oliveira-[\w-]+\.webp$/.test(name));
   const publicContactIcons = assets.filter(name => contactIconFiles.includes(name));
-  if (assets.length !== 6 || bundleAssets.length !== 2 || portraitAssets.length !== 1 ||
+  const project = showcase.projects.find(item => item.id === 'pe-de-moca');
+  const projectGalleryNames = project?.gallery.map(image => image.src.replace('/assets/projects/pe-de-moca/', '')).sort() || [];
+  if (assets.length !== 7 || !assets.includes('projects') || bundleAssets.length !== 2 || portraitAssets.length !== 1 ||
       publicContactIcons.length !== contactIconFiles.length ||
-      !bundleAssets.some(name => name.endsWith('.js')) || !bundleAssets.some(name => name.endsWith('.css'))) {
+      !bundleAssets.some(name => name.endsWith('.js')) || !bundleAssets.some(name => name.endsWith('.css')) ||
+      projectImageFiles.length !== 7 || new Set(projectImageFiles).size !== projectImageFiles.length ||
+      projectGalleryNames.join(',') !== [...projectImageFiles].sort().join(',') ||
+      project?.image !== '/assets/projects/pe-de-moca/home-desktop.webp' ||
+      project?.demoUrl !== 'https://delivery-pedemoca.pages.dev/' ||
+      project?.repositoryUrl !== 'https://github.com/777McLovin777/delivery-pedemoca') {
     throw new Error('Conjunto de bundles inesperado.');
   }
   const documents = publicDocumentFiles(showcase.projects);
-  const files = ['404.html', '_headers', ...faviconFiles, openGraphImageFile, ...documents, ...assets.map(name => `assets/${name}`)].sort();
+  const files = ['404.html', '_headers', ...faviconFiles, openGraphImageFile, ...documents,
+    ...assets.filter(name => name !== 'projects').map(name => `assets/${name}`),
+    ...projectImageFiles.map(name => `assets/projects/pe-de-moca/${name}`)].sort();
   const directories = new Set(['assets']);
   for (const name of files) {
     let parent = posix.dirname(name);
@@ -104,6 +130,12 @@ try {
   const smallFavicon = readFileSync(join(root, 'favicon-32.png'));
   const appleTouchIcon = readFileSync(join(root, 'apple-touch-icon.png'));
   const openGraphImage = readFileSync(join(root, openGraphImageFile));
+  const projectImageBuffers = projectImageFiles.map(name => readFileSync(join(root, 'assets', 'projects', 'pe-de-moca', name)));
+  const projectImagesValid = projectImageBuffers.every((buffer, index) => {
+    const dimensions = webpDimensions(buffer);
+    const [width, height] = projectImageDimensions[projectImageFiles[index]];
+    return dimensions?.width === width && dimensions?.height === height && buffer.length < 1_000_000;
+  });
   const openGraphDimensions = jpegDimensions(openGraphImage);
   const notFound = readFileSync(join(root, '404.html'), 'utf8');
   const routeHtml = routeDocuments(showcase.projects).map(route => ({
@@ -140,18 +172,22 @@ try {
     hasOneMeta(html, 'name', 'twitter:description', ogDescription) &&
     hasOneMeta(html, 'name', 'twitter:image', OPEN_GRAPH_IMAGE_URL));
   const publicText = [script, stylesheet, ...htmlDocuments, ...iconContents].join('\n');
+  const publicTextWithoutApprovedDemoUrl = publicText.replaceAll(project.demoUrl, '');
   if (!permissions.test(readFileSync(join(root, '_headers'), 'utf8')) || !icoValid ||
       !isPng(smallFavicon) || !isPng(appleTouchIcon) || iconContents.some(source => !safeContactSvg(source)) ||
       !openGraphDimensions || openGraphDimensions.width !== 1200 || openGraphDimensions.height !== 630 || openGraphImage.length > 500000 ||
       !exactMeta || /property="og:|name="twitter:/i.test(notFound) ||
+      !projectImagesValid || projectImageBuffers.reduce((total, image) => total + image.length, 0) > 2_000_000 ||
       decorativeStar.test(publicText) ||
       htmlDocuments.some(html => faviconLinks.some(link => !html.includes(link))) ||
       !bundleAssets.every(name => index.includes('/assets/' + name)) ||
       !script.includes('/assets/' + portraitAssets[0]) ||
+      projectImageFiles.some(name => !script.includes(`/assets/projects/pe-de-moca/${name}`)) ||
       contactIconFiles.some(name => !script.includes(`/assets/${name}`)) ||
       routeHtml.some(({html}) => !bundleAssets.every(name => html.includes('/assets/' + name))) ||
       publicContacts.some(value => !script.includes(value)) ||
-      /supabase\.co|storage:\/\/|#\/admin|VITE_|contato@exemplo\.com|delivery-pedemoca\.pages\.dev|atelier_portfolio_v1_data|sb_(?:secret|publishable)_|doceconecta|doce conecta|doce-conecta/i.test([index, script, ...routeHtml.map(route => route.html)].join('\n'))) {
+      !script.includes(project.demoUrl) || !script.includes(project.repositoryUrl) ||
+      /supabase\.co|storage:\/\/|#\/admin|VITE_|contato@exemplo\.com|delivery-pedemoca\.pages\.dev|atelier_portfolio_v1_data|sb_(?:secret|publishable)_|doceconecta|doce conecta|doce-conecta/i.test(publicTextWithoutApprovedDemoUrl)) {
     throw new Error('Referência privada, proteção ausente ou bundle não referenciado.');
   }
   const manifest = files.map(name => `${createHash('sha256').update(readFileSync(join(root, name))).digest('hex')}  dist-vitrine/${name}`).join('\n') + '\n';
