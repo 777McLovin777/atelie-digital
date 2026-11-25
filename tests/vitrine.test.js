@@ -230,6 +230,10 @@ test('home is a summary and keeps links to projects, services, studio and contac
   assert.match(home, /PUBLIC_PATHS\.contact/);
   assert.doesNotMatch(home, /home-process|studio-section|<Services/);
   const homeStyles = readFileSync(new URL('../src/components/commercial-home.css', import.meta.url), 'utf8');
+  assert.match(homeStyles, /\.service-summary li\s*\{[^}]*flex-direction:\s*column/);
+  assert.match(homeStyles, /\.service-summary li > strong\s*\{[^}]*white-space:\s*nowrap/);
+  assert.match(homeStyles, /@media \(max-width: 1050px\)\s*\{\s*\.service-summary\s*\{\s*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
+  assert.match(homeStyles, /\.service-summary\s*\{\s*grid-template-columns:\s*minmax\(0, 1fr\)/);
   assert.match(homeStyles, /\.commercial-home > \.hero\s*\{\s*min-height:\s*clamp\(/);
   assert.match(homeStyles, /\.commercial-home \.featured \.project-visual\s*\{\s*height:\s*clamp\(14rem/);
   assert.doesNotMatch(homeStyles, /grid-template-areas:/);
