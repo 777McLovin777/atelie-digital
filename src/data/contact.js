@@ -11,8 +11,16 @@ export function quoteHref(email, service = '') {
       /\.(?:example|invalid|test|localhost)$/.test(parts[1]) ||
       parts[1].split('.').some(label => label.length > 63 || label.startsWith('-') || label.endsWith('-'))) return '';
 
-  const subject = 'Solicitação de orçamento';
-  const body = `Olá, Ateliê Digital!\r\n\r\nTipo de projeto: ${service}\r\nObjetivo:\r\nPrazo previsto:\r\n`;
+  const subject = 'Solicitação de orçamento — Ateliê Digital';
+  const projectType = typeof service === 'string' ? service.trim() : '';
+  const body = [
+    'Olá, Leonardo de Oliveira!',
+    '',
+    `Tipo de Projeto:${projectType ? ` ${projectType}` : ''}`,
+    'Telefone:',
+    'Objetivo:',
+    'Prazo Previsto:',
+  ].join('\r\n');
   return `mailto:${address}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 

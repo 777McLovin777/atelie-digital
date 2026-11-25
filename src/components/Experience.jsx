@@ -1,10 +1,10 @@
 import React from 'react';
-import { ArrowUpRight, Layers3, Compass, Workflow, PanelsTopLeft, Sparkles } from 'lucide-react';
+import { ArrowUpRight, Layers3, Compass, Workflow, PanelsTopLeft } from 'lucide-react';
 import { DEFAULT_SERVICES, SERVICE_DETAILS } from '../data/content';
 import { CONTACT_PENDING, quoteHref } from '../data/contact';
 import { PUBLIC_PATHS } from '../data/publicUrls.js';
 import {PublicAsset} from './AssetUrlContext';
-const serviceIcons = {development:PanelsTopLeft, systems:Layers3, automation:Workflow, interfaces:Sparkles};
+const serviceIcons = {development:PanelsTopLeft, systems:Layers3, automation:Workflow, interfaces:Compass};
 
 export function Services({services=[], email, standalone=false}) {
   const Heading = standalone ? 'h1' : 'h2';

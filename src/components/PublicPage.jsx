@@ -68,14 +68,17 @@ export default function PublicPage({detailId, detail, route, data, filter, setFi
           <h1 id="contact-title">Contato comercial</h1>
           <p>Escolha um canal para conversar sobre seu projeto.</p>
           <ul className="contact-channels" aria-label="Canais de contato">
-            {emailContact && <li><a className="contact-channel" href={emailContact}>
-              <span>E-mail</span><strong>{data.profile.email}</strong>
+            {emailContact && <li><a className="contact-channel" href={emailContact} aria-label="Enviar e-mail para solicitar orçamento">
+              <span className="contact-channel-label"><img src="/assets/gmail.svg" width="22" height="22" alt="" aria-hidden="true" />E-mail</span>
+              <ArrowUpRight size={18} aria-hidden="true" />
             </a></li>}
             {github && <li><a className="contact-channel" href={github} target="_blank" rel="noopener noreferrer">
-              GitHub — Conheça meus projetos <ArrowUpRight size={18} aria-hidden="true" />
+              <span className="contact-channel-label"><img src="/assets/github.svg" width="22" height="22" alt="" aria-hidden="true" />GitHub — Conheça meus projetos</span>
+              <ArrowUpRight size={18} aria-hidden="true" />
             </a></li>}
             {whatsapp && <li><a className="contact-channel whatsapp-channel" href={whatsapp} target="_blank" rel="noopener noreferrer">
-              WhatsApp — Conversar sobre um projeto <ArrowUpRight size={18} aria-hidden="true" />
+              <span className="contact-channel-label"><img src="/assets/whatsapp.svg" width="22" height="22" alt="" aria-hidden="true" />WhatsApp — Conversar sobre um projeto</span>
+              <ArrowUpRight size={18} aria-hidden="true" />
             </a></li>}
           </ul>
           {!emailContact && !github && !whatsapp && <div className="contact-pending">
@@ -86,7 +89,7 @@ export default function PublicPage({detailId, detail, route, data, filter, setFi
         <aside className="contact-profile" aria-labelledby="profile-title">
           <img className="contact-profile-photo" src={leonardoPortrait} alt="Retrato profissional de Leonardo Oliveira, usando óculos e barba." width="960" height="960" decoding="async" />
           <div className="contact-profile-card">
-            <span className="contact-profile-brand"><span aria-hidden="true">✳</span> ATELIÊ DIGITAL</span>
+            <span className="contact-profile-brand">ATELIÊ DIGITAL</span>
             <h2 id="profile-title">Leonardo Oliveira</h2>
             <p>Desenvolvo sites, sistemas personalizados e automações que unem identidade visual, organização e praticidade.</p>
             <p>No Ateliê Digital, transformo ideias em experiências digitais claras e funcionais.</p>

@@ -163,20 +163,12 @@
 }
 
 .contact-page .contact-profile-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: .5rem;
+  display: block;
   margin-bottom: .45rem;
   color: var(--muted);
   font-size: .68rem;
   font-weight: 800;
   letter-spacing: .14em;
-}
-
-.contact-page .contact-profile-brand span {
-  color: var(--rust);
-  font-size: 1.25rem;
-  line-height: 1;
 }
 
 .contact-page .contact-profile-card h2 {
@@ -216,8 +208,20 @@
   background: #fff9e9df;
 }
 
-.contact-page .contact-channel strong {
-  font-weight: 700;
+.contact-page .contact-channel-label {
+  display: inline-flex;
+  align-items: center;
+  gap: .65rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.contact-page .contact-channel-label img {
+  display: block;
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
 }
 
 .contact-page .whatsapp-channel {
@@ -319,25 +323,11 @@
   z-index: 1;
 }
 
-.commercial-home .big-cta .cta-star {
-  opacity: .35;
-  color: #de966b;
-  pointer-events: none;
-}
-
 @media (max-width: 1050px) {
   .services .service-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .commercial-home .big-cta .cta-star {
-    position: static;
-    display: block;
-    width: max-content;
-    margin: .5rem 0 0 auto;
-    font-size: 2.75rem;
-    line-height: 1;
-  }
 }
 
 @media (min-width: 721px) and (max-width: 1000px) {

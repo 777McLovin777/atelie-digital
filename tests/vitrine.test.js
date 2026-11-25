@@ -18,8 +18,14 @@ test('vitrine has four services, disclosed samples and the authorized contact ch
   const email = new URL(quoteHref(showcase.profile.email, 'Sites'));
   assert.equal(email.protocol, 'mailto:');
   assert.equal(email.pathname, showcase.profile.email);
-  assert.equal(email.searchParams.get('subject'), 'Solicitação de orçamento');
-  assert.match(email.searchParams.get('body'), /Tipo de projeto: Sites\r\n/);
+  assert.equal(email.searchParams.get('subject'), 'Solicitação de orçamento — Ateliê Digital');
+  assert.equal(email.searchParams.get('body'), [
+    'Olá, Leonardo de Oliveira!', '', 'Tipo de Projeto: Sites', 'Telefone:', 'Objetivo:', 'Prazo Previsto:',
+  ].join('\r\n'));
+  const generalEmail = new URL(quoteHref(showcase.profile.email));
+  assert.equal(generalEmail.searchParams.get('body'), [
+    'Olá, Leonardo de Oliveira!', '', 'Tipo de Projeto:', 'Telefone:', 'Objetivo:', 'Prazo Previsto:',
+  ].join('\r\n'));
   assert.equal(quoteHref('contato@example.com'), '');
   const whatsapp = new URL(whatsappHref(showcase.profile.whatsapp));
   assert.equal(whatsapp.origin, 'https://wa.me');
@@ -33,6 +39,39 @@ test('contact links use the requested order and safe external-tab attributes', (
   assert.ok(page.indexOf('E-mail</span>') < page.indexOf('GitHub — Conheça meus projetos'));
   assert.ok(page.indexOf('GitHub — Conheça meus projetos') < page.indexOf('WhatsApp — Conversar sobre um projeto'));
   assert.match(page, /target="_blank" rel="noopener noreferrer"/);
+  assert.match(page, /className="contact-channel" href=\{emailContact\} aria-label="Enviar e-mail para solicitar orçamento">\s*<span className="contact-channel-label"><img src="\/assets\/gmail\.svg" width="22" height="22" alt="" aria-hidden="true" \/>E-mail<\/span>\s*<ArrowUpRight size=\{18\} aria-hidden="true" \/>/);
+  assert.doesNotMatch(page, /<strong>\{data\.profile\.email\}<\/strong>/);
+  for (const icon of ['gmail', 'github', 'whatsapp']) {
+    assert.match(page, new RegExp(`/assets/${icon}\\.svg`));
+  }
+  assert.equal((page.match(/width="22" height="22" alt="" aria-hidden="true"/g) || []).length, 3);
+});
+
+test('favicon files are linked on every generated route and decorative stars are absent', () => {
+  const html = readFileSync(new URL('../vitrine/index.html', import.meta.url), 'utf8');
+  for (const link of [
+    '<link rel="icon" href="/favicon.ico" sizes="any" />',
+    '<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />',
+    '<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />',
+  ]) assert.ok(html.includes(link));
+  const publicFiles = [
+    '../src/components/CommercialHome.jsx', '../src/components/PublicPage.jsx',
+    '../src/components/Experience.jsx', '../vitrine/main.jsx', '../vitrine/index.html',
+  ].map(path => readFileSync(new URL(path, import.meta.url), 'utf8')).join('\n');
+  assert.doesNotMatch(publicFiles, /✳|✱|✻|✼|✽|❋|❊|❉|⁎|∗|＊|&#10035;|&#x2733;/);
+  assert.doesNotMatch(publicFiles, /Sparkles/);
+  const styles = readFileSync(new URL('../src/components/commercial-home.css', import.meta.url), 'utf8');
+  assert.doesNotMatch(styles, /content\s*:\s*['"][✳✱✻✼✽❋❊❉⁎∗＊]/);
+});
+
+test('commercial SVGs contain only passive local vector shapes', () => {
+  for (const name of ['gmail.svg', 'github.svg', 'whatsapp.svg']) {
+    const source = readFileSync(new URL(`../src/assets/contact/${name}`, import.meta.url), 'utf8');
+    assert.match(source, /^\s*<svg\b[\s\S]*<\/svg>\s*$/i);
+    assert.doesNotMatch(source, /<\s*(?:script|foreignObject|iframe|object|embed|image|use|animate(?:Motion|Transform)?|set)\b|\bon[a-z0-9_-]+\s*=|\b(?:href|xlink:href|src)\s*=|\bstyle\s*=|url\s*\(|javascript:|data:/i);
+    const elements = [...source.matchAll(/<\/?([a-z][\w-]*)\b/gi)].map(([, element]) => element.toLowerCase());
+    assert.ok(elements.length > 0 && elements.every(element => ['svg', 'g', 'path'].includes(element)));
+  }
 });
 
 test('contact page presents the approved portrait with a responsive profile card', () => {

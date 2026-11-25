@@ -60,7 +60,7 @@ function App() {
     <a className="skip-link" href="#conteudo" onClick={event => { event.preventDefault(); document.getElementById('conteudo')?.focus(); }}>Pular para o conteúdo</a>
     <div className="landscape" aria-hidden="true"><div className="landscape-sun"/><div className="dune dune-back"/><div className="dune dune-front"/><div className="landscape-grain"/></div>
     <header className="topbar" onKeyDown={closeMenu}>
-      <a className="wordmark" href={PUBLIC_PATHS.home} onClick={() => setMenu(false)}>{showcase.profile.brand}<span className="mark" aria-hidden="true">✳</span></a>
+      <a className="wordmark" href={PUBLIC_PATHS.home} onClick={() => setMenu(false)}>{showcase.profile.brand}</a>
       <button ref={menuToggle} className="menu-toggle" type="button" aria-label={menu ? 'Fechar menu' : 'Abrir menu'}
         aria-expanded={menu} aria-controls="navigation" onClick={() => setMenu(open => !open)}>
         {menu ? <X aria-hidden="true"/> : <Menu aria-hidden="true"/>}
@@ -76,7 +76,7 @@ function App() {
         <h1>Página não encontrada.</h1><a className="pill dark" href={PUBLIC_PATHS.home}>Voltar à vitrine</a>
       </main>}
     <footer className="footer">
-      <div><strong>{showcase.profile.brand} ✳</strong></div>
+      <div><strong>{showcase.profile.brand}</strong></div>
       <div className="footer-right"><a href={PUBLIC_PATHS.contact}>Contato comercial</a></div>
       <span className="footer-bottom">© {new Date().getFullYear()} · {showcase.profile.brand}</span>
     </footer>

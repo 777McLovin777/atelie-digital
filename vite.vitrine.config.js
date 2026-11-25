@@ -9,6 +9,8 @@ import {showcase} from './vitrine/content.js';
 
 const project = dirname(fileURLToPath(import.meta.url));
 const root = resolve(project, 'vitrine');
+const contactIconFiles = ['gmail.svg', 'github.svg', 'whatsapp.svg'];
+const faviconFiles = ['favicon.ico', 'favicon-32.png', 'apple-touch-icon.png'];
 
 function showcaseFiles() {
   return {
@@ -33,6 +35,12 @@ function showcaseFiles() {
       }
       for (const fileName of ['_headers', '404.html']) {
         this.emitFile({type:'asset', fileName, source:readFileSync(resolve(root, fileName), 'utf8')});
+      }
+      for (const fileName of contactIconFiles) {
+        this.emitFile({type:'asset', fileName:`assets/${fileName}`, source:readFileSync(resolve(project, 'src', 'assets', 'contact', fileName))});
+      }
+      for (const fileName of faviconFiles) {
+        this.emitFile({type:'asset', fileName, source:readFileSync(resolve(root, 'icons', fileName))});
       }
     },
   };

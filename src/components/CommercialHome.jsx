@@ -34,7 +34,6 @@ export default function CommercialHome({ data }) {
       <div className="hero-art" aria-hidden="true">
         <div className="art-glass"><strong>Entre a ideia<br />e o extraordinário.</strong></div>
         <div className="sun" /><div className="arch arch-one" /><div className="arch arch-two" />
-        <div className="art-star">✳</div>
       </div>
     </section>
     <section className="home-services" aria-labelledby="home-services-title">
@@ -61,7 +60,6 @@ export default function CommercialHome({ data }) {
       <a className="pill pale" href={PUBLIC_PATHS.contact}>
         Ver canais de contato <ArrowUpRight size={19} aria-hidden="true" />
       </a>
-      <span className="cta-star" aria-hidden="true">✳</span>
     </section>
   </main>;
 }
