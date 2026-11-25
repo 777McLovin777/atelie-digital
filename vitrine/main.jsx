@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Menu, X} from 'lucide-react';
 import PublicPage from '../src/components/PublicPage';
-import {currentPublicPath, PUBLIC_PATHS, routeId} from '../src/data/publicUrls.js';
+import {currentPublicPath, PUBLIC_PATHS, PUBLIC_TITLE, routeId} from '../src/data/publicUrls.js';
 import '../src/styles.css';
 import '../src/theme.css';
 import '../src/responsive.css';
@@ -41,8 +41,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const title = detail?.name || (detailId ? 'Projeto não encontrado' : page?.[1]);
-    document.title = `${title || (known ? 'Estúdio de soluções digitais' : 'Página não encontrada')} · Ateliê Digital`;
+    document.title = PUBLIC_TITLE;
     if (route !== PUBLIC_PATHS.home) {
       window.scrollTo({top:0, behavior:'instant'});
       focusContent();

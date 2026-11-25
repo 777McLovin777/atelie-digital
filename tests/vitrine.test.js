@@ -4,7 +4,25 @@ import test from 'node:test';
 import {showcase} from '../vitrine/content.js';
 import {quoteHref, WHATSAPP_INITIAL_MESSAGE, whatsappHref} from '../src/data/contact.js';
 import {isDemoProject} from '../src/data/demoProjects.js';
-import {currentPublicPath, projectPath, publicDocumentFiles, routeDocuments, routeId, safeUrl} from '../src/data/publicUrls.js';
+import {currentPublicPath, HOME_METADATA, OPEN_GRAPH_IMAGE_URL, PUBLIC_ORIGIN, PUBLIC_PATHS, PUBLIC_TITLE, projectPath, publicDocumentFiles, routeDocuments, routeId, safeUrl} from '../src/data/publicUrls.js';
+
+function jpegDimensions(buffer) {
+  if (buffer[0] !== 0xff || buffer[1] !== 0xd8) return null;
+  const frameMarkers = new Set([0xc0, 0xc1, 0xc2, 0xc3, 0xc5, 0xc6, 0xc7, 0xc9, 0xca, 0xcb, 0xcd, 0xce, 0xcf]);
+  let offset = 2;
+  while (offset < buffer.length) {
+    if (buffer[offset] !== 0xff) return null;
+    while (buffer[offset] === 0xff) offset++;
+    const marker = buffer[offset++];
+    if (marker === 0xd9 || marker === 0xda || offset + 1 >= buffer.length) return null;
+    if (marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) continue;
+    const length = buffer.readUInt16BE(offset);
+    if (length < 2 || offset + length > buffer.length) return null;
+    if (frameMarkers.has(marker)) return {width:buffer.readUInt16BE(offset + 5), height:buffer.readUInt16BE(offset + 3)};
+    offset += length;
+  }
+  return null;
+}
 
 test('vitrine has four services, disclosed samples and the authorized contact channels', () => {
   assert.equal(showcase.services.length, 4);
@@ -94,10 +112,40 @@ test('contact page presents the approved portrait with a responsive profile card
 test('SEO metadata matches the Portuguese public showcase', () => {
   const html = readFileSync(new URL('../vitrine/index.html', import.meta.url), 'utf8');
   assert.match(html, /<html lang="pt-BR">/);
-  assert.match(html, /<title>Ateliê Digital · Estúdio de soluções digitais<\/title>/);
+  assert.match(html, /<title>Ateliê Digital<\/title>/);
+  assert.equal(PUBLIC_TITLE, 'Ateliê Digital');
+  assert.deepEqual(HOME_METADATA, {
+    title: 'Ateliê Digital',
+    ogTitle: 'Ateliê Digital | Soluções digitais',
+    ogDescription: 'Sites, sistemas personalizados e automações para transformar ideias em soluções digitais.',
+    url: `${PUBLIC_ORIGIN}/`,
+  });
   assert.match(html, /property="og:site_name" content="Ateliê Digital"/);
   assert.match(html, /property="og:locale" content="pt_BR"/);
-  assert.match(html, /name="twitter:card" content="summary"/);
+  for (const tag of [
+    `property="og:title" content="${HOME_METADATA.ogTitle}"`,
+    `property="og:description" content="${HOME_METADATA.ogDescription}"`,
+    `property="og:image" content="${OPEN_GRAPH_IMAGE_URL}"`,
+    'property="og:image:width" content="1200"',
+    'property="og:image:height" content="630"',
+    'property="og:image:alt" content="Ateliê Digital — identidade visual e soluções digitais."',
+    `property="og:url" content="${HOME_METADATA.url}"`,
+    'name="twitter:card" content="summary_large_image"',
+    `name="twitter:image" content="${OPEN_GRAPH_IMAGE_URL}"`,
+    `name="twitter:title" content="${HOME_METADATA.ogTitle}"`,
+    `name="twitter:description" content="${HOME_METADATA.ogDescription}"`,
+  ]) assert.ok(html.includes(tag), `Metadado esperado ausente: ${tag}`);
+  for (const name of ['og:type', 'og:title', 'og:description', 'og:image', 'og:image:width', 'og:image:height', 'og:image:alt', 'og:url', 'twitter:card', 'twitter:title', 'twitter:description', 'twitter:image']) {
+    const attribute = name.startsWith('twitter:') ? 'name' : 'property';
+    assert.equal((html.match(new RegExp(`<meta ${attribute}="${name}"`, 'g')) || []).length, 1, `${name} deve aparecer uma única vez`);
+  }
+  const ogImage = readFileSync(new URL('../vitrine/og-image.jpg', import.meta.url));
+  assert.deepEqual(jpegDimensions(ogImage), {width:1200, height:630});
+  assert.ok(ogImage.length < 500000, 'Imagem Open Graph deve ser leve para compartilhamento');
+  assert.equal(new URL(OPEN_GRAPH_IMAGE_URL).protocol, 'https:');
+  const runtime = readFileSync(new URL('../vitrine/main.jsx', import.meta.url), 'utf8');
+  assert.match(runtime, /document\.title = PUBLIC_TITLE/);
+  assert.doesNotMatch(runtime, /document\.title\s*=.*· Ateliê Digital/);
 });
 
 test('public routes and headers keep navigation and network restricted', () => {
@@ -108,9 +156,12 @@ test('public routes and headers keep navigation and network restricted', () => {
   assert.equal(currentPublicPath('/', '#/sobre'), '/estudio');
   assert.equal(currentPublicPath('/estudio/', ''), '/estudio');
   assert.equal(currentPublicPath('/projeto/pe-de-moca', ''), '/projeto/pe-de-moca');
-  assert.deepEqual(routeDocuments(showcase.projects).map(route => route.path), [
+  const documents = routeDocuments(showcase.projects);
+  assert.deepEqual(documents.map(route => route.path), [
     '/projetos', '/estudio', '/servicos', '/contato', '/projeto/pe-de-moca', '/projeto/laboratorio',
   ]);
+  assert.deepEqual(documents.map(route => route.title), Array(6).fill(PUBLIC_TITLE));
+  assert.ok(documents.every(route => route.url === `${PUBLIC_ORIGIN}${route.path}` && route.ogTitle && route.ogDescription));
   assert.deepEqual(publicDocumentFiles(showcase.projects), [
     'index.html', 'projetos/index.html', 'estudio/index.html', 'servicos/index.html', 'contato/index.html',
     'projeto/pe-de-moca/index.html', 'projeto/laboratorio/index.html',
@@ -120,7 +171,7 @@ test('public routes and headers keep navigation and network restricted', () => {
   assert.match(app, /addEventListener\('popstate'/);
   assert.match(app, /currentPublicPath\(location\.pathname, location\.hash\)/);
   const notFound = readFileSync(new URL('../vitrine/404.html', import.meta.url), 'utf8');
-  assert.match(notFound, /<title>Página não encontrada · Ateliê Digital<\/title>/);
+  assert.match(notFound, /<title>Ateliê Digital<\/title>/);
   assert.match(notFound, /Voltar à vitrine do Ateliê Digital/);
   const headers = readFileSync(new URL('../vitrine/_headers', import.meta.url), 'utf8');
   for (const directive of ["connect-src 'none'", "form-action 'none'", "frame-ancestors 'none'"]) {

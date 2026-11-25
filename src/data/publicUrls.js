@@ -7,6 +7,16 @@ export const PUBLIC_PATHS = Object.freeze({
   projectPrefix: '/projeto/',
 });
 
+export const PUBLIC_ORIGIN = 'https://atelie-digital-211.pages.dev';
+export const OPEN_GRAPH_IMAGE_URL = `${PUBLIC_ORIGIN}/og-image.jpg`;
+export const PUBLIC_TITLE = 'Ateliê Digital';
+export const HOME_METADATA = Object.freeze({
+  title: PUBLIC_TITLE,
+  ogTitle: 'Ateliê Digital | Soluções digitais',
+  ogDescription: 'Sites, sistemas personalizados e automações para transformar ideias em soluções digitais.',
+  url: `${PUBLIC_ORIGIN}/`,
+});
+
 const LEGACY_PATHS = Object.freeze({
   '/': PUBLIC_PATHS.home,
   '/projetos': PUBLIC_PATHS.projects,
@@ -47,10 +57,14 @@ export function routeId(route) {
 
 export function routeDocuments(projects = []) {
   const pages = [
-    {path: PUBLIC_PATHS.projects, file: 'projetos/index.html', title: 'Projetos · Ateliê Digital'},
-    {path: PUBLIC_PATHS.studio, file: 'estudio/index.html', title: 'O estúdio · Ateliê Digital'},
-    {path: PUBLIC_PATHS.services, file: 'servicos/index.html', title: 'Serviços · Ateliê Digital'},
-    {path: PUBLIC_PATHS.contact, file: 'contato/index.html', title: 'Contato · Ateliê Digital'},
+    {path: PUBLIC_PATHS.projects, file: 'projetos/index.html', title: PUBLIC_TITLE,
+      ogTitle: 'Projetos | Ateliê Digital', ogDescription: 'Explore projetos demonstrativos de experiências digitais criadas pelo Ateliê Digital.'},
+    {path: PUBLIC_PATHS.studio, file: 'estudio/index.html', title: PUBLIC_TITLE,
+      ogTitle: 'Estúdio | Ateliê Digital', ogDescription: 'Conheça o Ateliê Digital e sua abordagem para criar sites, sistemas e automações.'},
+    {path: PUBLIC_PATHS.services, file: 'servicos/index.html', title: PUBLIC_TITLE,
+      ogTitle: 'Serviços | Ateliê Digital', ogDescription: HOME_METADATA.ogDescription},
+    {path: PUBLIC_PATHS.contact, file: 'contato/index.html', title: PUBLIC_TITLE,
+      ogTitle: 'Contato | Ateliê Digital', ogDescription: 'Entre em contato com Leonardo Oliveira para conversar sobre um projeto digital.'},
   ];
   for (const project of projects) {
     const path = projectPath(project.id);
@@ -60,10 +74,12 @@ export function routeDocuments(projects = []) {
     pages.push({
       path,
       file: `${path.slice(1)}/index.html`,
-      title: `${project.name} · Ateliê Digital`,
+      title: PUBLIC_TITLE,
+      ogTitle: `${project.name} | Ateliê Digital`,
+      ogDescription: `Projeto demonstrativo. ${project.description}`,
     });
   }
-  return pages;
+  return pages.map(page => ({...page, url: new URL(page.path, PUBLIC_ORIGIN).href}));
 }
 
 export function publicDocumentFiles(projects = []) {
