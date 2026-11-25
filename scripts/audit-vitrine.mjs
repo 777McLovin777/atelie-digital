@@ -101,7 +101,7 @@ try {
       !bundleAssets.some(name => name.endsWith('.js')) || !bundleAssets.some(name => name.endsWith('.css')) ||
       projectImageFiles.length !== 7 || new Set(projectImageFiles).size !== projectImageFiles.length ||
       projectGalleryNames.join(',') !== [...projectImageFiles].sort().join(',') ||
-      project?.image !== '/assets/projects/pe-de-moca/home-desktop.webp' ||
+      project?.image !== '/assets/projects/pe-de-moca/catalog-mobile.webp' ||
       project?.demoUrl !== 'https://delivery-pedemoca.pages.dev/' ||
       project?.repositoryUrl !== 'https://github.com/777McLovin777/delivery-pedemoca') {
     throw new Error('Conjunto de bundles inesperado.');

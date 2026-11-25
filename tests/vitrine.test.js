@@ -32,7 +32,7 @@ test('vitrine has four services, disclosed samples and the authorized contact ch
   assert.ok(showcase.projects.every(p => isDemoProject(p) && !p.link && !p.results));
   const peDeMoca = showcase.projects[0];
   const laboratorio = showcase.projects[1];
-  assert.equal(peDeMoca.image, '/assets/projects/pe-de-moca/home-desktop.webp');
+  assert.equal(peDeMoca.image, '/assets/projects/pe-de-moca/catalog-mobile.webp');
   assert.equal(peDeMoca.gallery.length, 7);
   assert.ok(peDeMoca.gallery.every(image => image.src.startsWith('/assets/projects/pe-de-moca/') && image.alt && image.caption && image.width > 0 && image.height > 0));
   assert.deepEqual(laboratorio.gallery, []);

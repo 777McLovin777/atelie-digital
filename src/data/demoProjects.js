@@ -13,7 +13,7 @@ export const DEMO_PROJECTS = [
     id:'pe-de-moca', name:'Pé de Moça', type:'Plataforma digital para confeitaria artesanal', year:'2026', category:'Web',
     description:'Aplicação web de delivery e presença digital que reúne identidade visual, catálogo de produtos e uma experiência orientada à preparação do pedido.',
     tags:['React','Vite'], link:'', demoUrl:'https://delivery-pedemoca.pages.dev/', repositoryUrl:'https://github.com/777McLovin777/delivery-pedemoca',
-    image:'/assets/projects/pe-de-moca/home-desktop.webp', gallery:peDeMocaGallery, tone:'peach', featured:true,
+    image:'/assets/projects/pe-de-moca/catalog-mobile.webp', gallery:peDeMocaGallery, tone:'peach', featured:true,
   },
   {
     id:'laboratorio', name:'Laboratório Criativo', type:'Experimentos • Interação', year:'2026', category:'Experimento',
