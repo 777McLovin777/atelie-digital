@@ -17,6 +17,8 @@ service-account*.json
 backups/
 backup/
 .backups/
+local-backup-port-preview-*/
+local-backup-port-preview-*.zip
 **/backups/
 **/backup/
 **/.aws/

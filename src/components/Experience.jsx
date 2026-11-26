@@ -76,7 +76,7 @@ function ProjectGalleryView({images, project}) {
     triggerRef.current?.focus({preventScroll:true});
   }
 
-  return <section className="project-gallery" aria-labelledby="project-gallery-title">
+  return <section className={`project-gallery project-gallery-${project.id}`} aria-labelledby="project-gallery-title">
     <div className="project-gallery-heading">
       <div><span className="eyebrow">INTERFACES</span><h2 id="project-gallery-title">Galeria de telas</h2></div>
       <p>Capturas do projeto em diferentes páginas e tamanhos de tela. Selecione uma imagem para ampliar.</p>

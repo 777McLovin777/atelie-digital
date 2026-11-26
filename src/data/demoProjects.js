@@ -20,6 +20,47 @@ export const DEMO_PROJECTS = [
     description:'Uma coleção de pequenos testes visuais, protótipos e interfaces para explorar possibilidades.',
     tags:['Interação','Motion','Frontend'], link:'', image:'', gallery:[], tone:'rust', featured:false,
   },
+  {
+    id:'conciliacnes', name:'ConciliaCNES', type:'Automação local • Desktop', year:'', category:'Automação',
+    description:'Aplicativo local para conferência RH × CNES com geração de relatório Excel.',
+    tags:['Desktop','Processamento local','Excel'], link:'', image:'/assets/projects/conciliacnes/files-step.webp', icon:'/assets/projects/conciliacnes/icon.webp', tone:'teal', featured:false,
+    gallery:[
+      {src:'/assets/projects/conciliacnes/files-step.webp', alt:'Tela inicial do ConciliaCNES na etapa para carregar os arquivos de entrada.', caption:'Etapa 1 · Carregar arquivos', width:1440, height:857},
+      {src:'/assets/projects/conciliacnes/establishments-step.webp', alt:'Tela demonstrativa de seleção de estabelecimentos no ConciliaCNES.', caption:'Etapa 2 · Selecionar estabelecimentos', width:1439, height:861},
+      {src:'/assets/projects/conciliacnes/excel-report-step.webp', alt:'Tela demonstrativa para gerar relatório Excel no ConciliaCNES.', caption:'Etapa 3 · Gerar relatório Excel', width:1438, height:858},
+    ],
+    caseStudy:{
+      overview:'Aplicação desktop/local para comparar informações de um PDF do CNES e uma planilha RH, com seleção de estabelecimentos e proposta de relatório Excel de inconsistências.',
+      problem:'A conferência entre as informações de RH e CNES pode exigir comparação manual e tornar mais difícil localizar divergências.',
+      steps:['Carregar o PDF do CNES e a planilha RH.','Selecionar os estabelecimentos que serão conferidos.','Gerar um relatório Excel com as inconsistências identificadas.'],
+      highlights:['Uso local e offline.','Foco na conferência de informações.','Relatório estruturado em Excel.','Apoio às rotinas operacionais.'],
+      notice:'O processamento é local. Os arquivos selecionados não são enviados à nuvem.',
+      validation:'Este estudo apresenta capturas das etapas. A execução ponta a ponta com arquivos reais não foi validada nesta vitrine.',
+      ownershipDisclosure:'Aplicativo autoral e interface divulgados com autorização do proprietário. Sem vínculo ou endosso institucional do Ministério da Saúde, de Secretarias de Saúde, do CNES ou do e-SUS.',
+    },
+  },
+  {
+    id:'conversores-sus', name:'Conversores SUS', type:'Automação local • Desktop', year:'', category:'Automação',
+    description:'Central desktop local demonstrativa que reúne quatro módulos de conversão apresentados nas capturas.',
+    tags:['Desktop','Processamento local','Conversão de arquivos'], link:'', image:'/assets/projects/conversores-sus/home-portfolio.webp', icon:'/assets/projects/conversores-sus/icon.webp', tone:'orange', featured:false,
+    gallery:[
+      {src:'/assets/projects/conversores-sus/home-portfolio.webp', alt:'Tela inicial demonstrativa da central de módulos Conversores SUS com identificação visual adaptada.', caption:'Central de módulos · identificação visual adaptada', width:1440, height:856},
+      {src:'/assets/projects/conversores-sus/apac-paciente-portfolio.webp', alt:'Formulário vazio da etapa de dados do paciente no módulo APAC Magnético; identificação visual adaptada.', caption:'APAC Magnético · Dados do paciente · identificação visual adaptada', width:1440, height:858},
+      {src:'/assets/projects/conversores-sus/apac-procedimentos-portfolio.webp', alt:'Tela demonstrativa de procedimentos no módulo APAC Magnético; identificação visual adaptada.', caption:'APAC Magnético · Procedimentos · identificação visual adaptada', width:1440, height:846},
+      {src:'/assets/projects/conversores-sus/biomega-bpac-portfolio.webp', alt:'Tela demonstrativa do conversor local Biomega PDF para BPA-C; identificação visual adaptada.', caption:'Biomega · Conversão PDF para BPA-C · identificação visual adaptada', width:1440, height:857},
+      {src:'/assets/projects/conversores-sus/visa-bpac-portfolio.webp', alt:'Tela demonstrativa do conversor local VISA Word para BPA-C; identificação visual adaptada.', caption:'VISA · Conversão Word para BPA-C · identificação visual adaptada', width:1440, height:858},
+      {src:'/assets/projects/conversores-sus/samu-bpac-portfolio.webp', alt:'Tela demonstrativa do conversor local SAMU Excel para BPA-C; identificação visual adaptada.', caption:'SAMU · Conversão Excel para BPA-C · identificação visual adaptada', width:1440, height:858},
+    ],
+    caseStudy:{
+      overview:'Hub desktop local com quatro módulos apresentados para conversões de arquivos usadas em rotinas operacionais.',
+      problem:'Rotinas de conversão em formatos distintos podem demandar etapas repetidas e ferramentas separadas.',
+      modules:['APAC Magnético','Biomega PDF → BPA-C','VISA Word → BPA-C','SAMU Excel → BPA-C'],
+      highlights:['Quatro módulos em uma central desktop.','Processamento local e offline.','Foco em produtividade operacional.','Apoio à padronização das rotinas.'],
+      notice:'Ferramenta de uso local/offline; não depende de envio de arquivos à nuvem.',
+      validation:'Este estudo apresenta capturas das interfaces. A execução dos módulos e as conversões com arquivos reais não foram validadas nesta vitrine. Nas cópias editoriais, somente o emblema gráfico do cabeçalho foi ocultado; formulários, textos, valores e resultados visíveis foram preservados.',
+      ownershipDisclosure:'Aplicativo e capturas autorais divulgados com autorização do proprietário. Não é produto oficial do SUS, do Ministério da Saúde ou de Secretaria de Saúde e não possui endosso institucional.',
+    },
+  },
 ];
 
 export function isDemoProject(project) {

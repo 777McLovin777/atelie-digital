@@ -12,7 +12,7 @@ function ProjectDetails({project}) {
   return <main id="conteudo" tabIndex={-1} className="detail">
     <a className="back" href={PUBLIC_PATHS.projects}><ArrowLeft size={17} aria-hidden="true" /> Voltar aos projetos</a>
     <span className="eyebrow">PROJETO / {project.year}</span>
-    <h1>{project.name}</h1>
+    <h1 className="operational-title">{project.icon && <img src={project.icon} width="48" height="48" alt="" aria-hidden="true" />}{project.name}</h1>
     <p className="detail-sub">{project.type}</p>
     {isDemoProject(project) && <p className="project-disclosure">Projeto demonstrativo</p>}
     <ProjectVisual project={project} large />
@@ -27,6 +27,50 @@ function ProjectDetails({project}) {
         {link && <a className="pill dark detail-link" href={link} target="_blank" rel="noreferrer">Visitar projeto <ArrowUpRight size={17} aria-hidden="true" /></a>}
       </div>
     </div>
+    <ProjectGallery project={project} />
+  </main>;
+}
+
+function OperationalCaseStudy({project}) {
+  const study = project.caseStudy;
+  return <main id="conteudo" tabIndex={-1} className="detail case-study operational-case-study">
+    <a className="back" href={PUBLIC_PATHS.projects}><ArrowLeft size={17} aria-hidden="true" /> Voltar aos projetos</a>
+    <span className="eyebrow">ESTUDO DE CASO</span>
+    <h1>{project.name}</h1>
+    <p className="case-study-intro">{project.description}</p>
+    <p className="project-disclosure">Projeto demonstrativo · interfaces apresentadas sem validação operacional nesta vitrine</p>
+    <ProjectVisual project={project} large />
+    <div className="case-study-grid">
+      <section className="case-study-card" aria-labelledby={`${project.id}-overview`}>
+        <span className="eyebrow">VISÃO GERAL</span>
+        <h2 id={`${project.id}-overview`}>Como é a ferramenta</h2>
+        <p>{study.overview}</p>
+      </section>
+      <section className="case-study-card" aria-labelledby={`${project.id}-problem`}>
+        <span className="eyebrow">PROBLEMA QUE RESOLVE</span>
+        <h2 id={`${project.id}-problem`}>A proposta</h2>
+        <p>{study.problem}</p>
+      </section>
+    </div>
+    {study.steps && <section className="case-study-card operational-section" aria-labelledby={`${project.id}-steps`}>
+      <span className="eyebrow">FLUXO DE TRABALHO</span>
+      <h2 id={`${project.id}-steps`}>Como funciona</h2>
+      <ol className="operational-list">{study.steps.map((step, index) => <li key={step}>
+        <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>{step}
+      </li>)}</ol>
+    </section>}
+    {study.modules && <section className="case-study-card operational-section" aria-labelledby={`${project.id}-modules`}>
+      <span className="eyebrow">MÓDULOS DISPONÍVEIS</span>
+      <h2 id={`${project.id}-modules`}>Conversores</h2>
+      <ul className="module-list">{study.modules.map(module => <li key={module}>{module}</li>)}</ul>
+    </section>}
+    <section className="case-study-card operational-section" aria-labelledby={`${project.id}-highlights`}>
+      <span className="eyebrow">DESTAQUES</span>
+      <h2 id={`${project.id}-highlights`}>Apoio à operação</h2>
+      <ul className="operational-highlights">{study.highlights.map(item => <li key={item}>{item}</li>)}</ul>
+    </section>
+    <p className="operational-note">{study.notice} {study.validation}</p>
+    <p className="authorization-note"><strong>Divulgação autorizada pelo proprietário:</strong> {study.ownershipDisclosure}</p>
     <ProjectGallery project={project} />
   </main>;
 }
@@ -89,7 +133,7 @@ function ProjectCollection({projects, filter, setFilter}) {
 }
 
 export default function PublicPage({detailId, detail, route, data, filter, setFilter}) {
-  if (detailId) return detail ? detail.id === 'pe-de-moca' ? <PeDeMocaCaseStudy project={detail} /> : <ProjectDetails project={detail} /> :
+  if (detailId) return detail ? detail.id === 'pe-de-moca' ? <PeDeMocaCaseStudy project={detail} /> : detail.caseStudy ? <OperationalCaseStudy project={detail} /> : <ProjectDetails project={detail} /> :
     <main id="conteudo" tabIndex={-1} className="missing"><h1>Projeto não encontrado.</h1><a className="pill dark" href={PUBLIC_PATHS.projects}>Ver projetos</a></main>;
   if (route === PUBLIC_PATHS.projects) return <ProjectCollection projects={data.projects} filter={filter} setFilter={setFilter} />;
   if (route === PUBLIC_PATHS.services) return <main id="conteudo" tabIndex={-1} className="simple-page services-page">

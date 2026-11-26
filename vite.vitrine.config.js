@@ -16,6 +16,10 @@ const projectImageFiles = [
   'home-desktop.webp', 'home-mobile.webp', 'catalog-capture.webp', 'catalog-mobile.webp',
   'cart-desktop.webp', 'account-desktop.webp', 'account-mobile.webp',
 ];
+const operationalProjectFiles = {
+  conciliacnes: ['files-step.webp', 'establishments-step.webp', 'excel-report-step.webp', 'icon.webp'],
+  'conversores-sus': ['home-portfolio.webp', 'apac-paciente-portfolio.webp', 'apac-procedimentos-portfolio.webp', 'biomega-bpac-portfolio.webp', 'visa-bpac-portfolio.webp', 'samu-bpac-portfolio.webp', 'icon.webp'],
+};
 
 function escapeHtml(value) {
   return String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
@@ -77,6 +81,12 @@ function showcaseFiles() {
       for (const fileName of projectImageFiles) {
         this.emitFile({type:'asset', fileName:`assets/projects/pe-de-moca/${fileName}`,
           source:readFileSync(resolve(project, 'src', 'assets', 'projects', 'pe-de-moca', fileName))});
+      }
+      for (const [projectId, fileNames] of Object.entries(operationalProjectFiles)) {
+        for (const fileName of fileNames) {
+          this.emitFile({type:'asset', fileName:`assets/projects/${projectId}/${fileName}`,
+            source:readFileSync(resolve(project, 'src', 'assets', 'projects', projectId, fileName))});
+        }
       }
     },
   };

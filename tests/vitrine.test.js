@@ -24,11 +24,11 @@ function jpegDimensions(buffer) {
   return null;
 }
 
-test('vitrine has four services, disclosed samples and the authorized contact channels', () => {
+test('vitrine keeps the approved demos, filters and authorized contact channels', () => {
   assert.equal(showcase.services.length, 4);
-  assert.equal(showcase.projects.length, 2);
-  assert.deepEqual(showcase.projects.map(project => project.id), ['pe-de-moca', 'laboratorio']);
-  assert.deepEqual([...new Set(showcase.projects.map(project => project.category))], ['Web', 'Experimento']);
+  assert.equal(showcase.projects.length, 4);
+  assert.deepEqual(showcase.projects.map(project => project.id), ['pe-de-moca', 'laboratorio', 'conciliacnes', 'conversores-sus']);
+  assert.deepEqual([...new Set(showcase.projects.map(project => project.category))], ['Web', 'Experimento', 'Automação']);
   assert.ok(showcase.projects.every(p => isDemoProject(p) && !p.link && !p.results));
   const peDeMoca = showcase.projects[0];
   const laboratorio = showcase.projects[1];
@@ -40,6 +40,12 @@ test('vitrine has four services, disclosed samples and the authorized contact ch
   assert.equal(peDeMoca.demoUrl, 'https://delivery-pedemoca.pages.dev/');
   assert.equal(peDeMoca.repositoryUrl, 'https://github.com/777McLovin777/delivery-pedemoca');
   assert.doesNotMatch(peDeMoca.description, /vendas|clientes ativos|pagamento em produção/i);
+  const operationalApps = showcase.projects.slice(2);
+  assert.ok(operationalApps.every(project => !project.year && project.image.startsWith(`/assets/projects/${project.id}/`) && project.icon === `/assets/projects/${project.id}/icon.webp` && !project.demoUrl && !project.repositoryUrl));
+  assert.deepEqual(operationalApps.map(project => project.caseStudy.modules ? project.caseStudy.modules.length : project.caseStudy.steps.length), [3, 4]);
+  for (const folder of ['conciliacnes', 'conversores-sus']) {
+    assert.equal(readFileSync(new URL(`../src/assets/projects/${folder}/.gitkeep`, import.meta.url), 'utf8').trim(), '');
+  }
   assert.equal(showcase.profile.email, 'leo.ateliedigital@gmail.com');
   assert.equal(showcase.profile.github, 'https://github.com/777McLovin777');
   assert.equal(showcase.profile.whatsapp, '5511910513097');
@@ -62,12 +68,60 @@ test('vitrine has four services, disclosed samples and the authorized contact ch
   assert.equal(whatsappHref('123'), '');
 });
 
+test('ConciliaCNES and Conversores SUS use approved local captures in complete disclosed case studies', () => {
+  const [concilia, conversores] = showcase.projects.slice(2);
+  const page = readFileSync(new URL('../src/components/PublicPage.jsx', import.meta.url), 'utf8');
+  const card = readFileSync(new URL('../src/components/Project.jsx', import.meta.url), 'utf8');
+  assert.equal(concilia.name, 'ConciliaCNES');
+  assert.equal(concilia.category, 'Automação');
+  assert.equal(concilia.description, 'Aplicativo local para conferência RH × CNES com geração de relatório Excel.');
+  assert.match(concilia.caseStudy.overview, /PDF do CNES.*planilha RH.*estabelecimentos.*relatório Excel/);
+  assert.match(concilia.caseStudy.notice, /local.*não são enviados à nuvem/);
+  assert.match(concilia.caseStudy.validation, /não foi validada nesta vitrine/);
+  assert.match(concilia.caseStudy.ownershipDisclosure, /autorização do proprietário/);
+  assert.equal(concilia.caseStudy.steps.length, 3);
+  assert.equal(concilia.image, '/assets/projects/conciliacnes/files-step.webp');
+  assert.deepEqual(concilia.gallery.map(image => image.src.split('/').at(-1)), ['files-step.webp', 'establishments-step.webp', 'excel-report-step.webp']);
+  assert.ok(concilia.gallery.every(image => image.alt && image.caption && [1438, 1439, 1440].includes(image.width)));
+  assert.equal(conversores.name, 'Conversores SUS');
+  assert.equal(conversores.category, 'Automação');
+  assert.equal(conversores.caseStudy.modules.join('|'), 'APAC Magnético|Biomega PDF → BPA-C|VISA Word → BPA-C|SAMU Excel → BPA-C');
+  assert.equal(conversores.image, '/assets/projects/conversores-sus/home-portfolio.webp');
+  assert.deepEqual(conversores.gallery.map(image => image.src.split('/').at(-1)), ['home-portfolio.webp', 'apac-paciente-portfolio.webp', 'apac-procedimentos-portfolio.webp', 'biomega-bpac-portfolio.webp', 'visa-bpac-portfolio.webp', 'samu-bpac-portfolio.webp']);
+  assert.ok(conversores.gallery.every(image => image.alt && image.caption.includes("identificação visual adaptada") && image.width === 1440 && image.height > 0));
+  assert.match(conversores.caseStudy.notice, /local\/offline/);
+  assert.match(conversores.caseStudy.validation, /não foram validadas nesta vitrine/);
+  assert.match(conversores.caseStudy.validation, /somente o emblema gráfico do cabeçalho foi ocultado/);
+  assert.match(conversores.caseStudy.ownershipDisclosure, /Não é produto oficial do SUS/);
+  assert.match(page, /detail\.caseStudy \? <OperationalCaseStudy project=\{detail\} \/>/);
+  assert.match(page, /interfaces apresentadas sem validação operacional nesta vitrine/);
+  assert.match(page, /Divulgação autorizada pelo proprietário/);
+  assert.doesNotMatch(page, /Pendência de autorização para divulgação pública/);
+  assert.match(page, /<ProjectGallery project=\{project\} \/>/);
+  assert.match(card, /p\.icon && <img className="project-app-icon"/);
+  assert.match(card, /className=\{`project-cover project-cover-\$\{p\.id\}`\}/);
+  assert.match(page, /className="operational-title"/);
+  assert.match(page, /\{project\.icon && <img src=\{project\.icon\}/);
+  const styles = readFileSync(new URL('../src/responsive.css', import.meta.url), 'utf8');
+  assert.match(styles, /\.project-cover-conciliacnes, \.project-cover-conversores-sus \{ object-fit: contain/);
+  assert.match(styles, /\.project-gallery-conciliacnes \.gallery-media img, \.project-gallery-conversores-sus \.gallery-media img \{ object-fit: contain/);
+  for (const folder of ['conciliacnes', 'conversores-sus']) {
+    assert.equal(readFileSync(new URL(`../src/assets/projects/${folder}/icon.webp`, import.meta.url)).subarray(0, 4).toString(), 'RIFF');
+  }
+  assert.doesNotMatch(readFileSync(new URL('../src/assets/projects/conversores-sus/apac-paciente-portfolio.webp', import.meta.url)).toString('latin1'), /Saude4|MCLOVIN/);
+});
+
 test('Pé de Moça case study separates demonstrated screens from integrations pending validation', () => {
   const page = readFileSync(new URL('../src/components/PublicPage.jsx', import.meta.url), 'utf8');
   const gallery = readFileSync(new URL('../src/components/Experience.jsx', import.meta.url), 'utf8');
   const model = readFileSync(new URL('../src/data/demoProjects.js', import.meta.url), 'utf8');
   const vite = readFileSync(new URL('../vite.vitrine.config.js', import.meta.url), 'utf8');
   const audit = readFileSync(new URL('../scripts/audit-vitrine.mjs', import.meta.url), 'utf8');
+  const ignore = readFileSync(new URL('../.gitignore', import.meta.url), 'utf8');
+  const styles = readFileSync(new URL('../src/responsive.css', import.meta.url), 'utf8');
+  assert.equal(showcase.projects[0].image, '/assets/projects/pe-de-moca/catalog-mobile.webp');
+  assert.match(styles, /\.project-cover\s*\{[^}]*object-fit:\s*cover/);
+  assert.match(styles, /\.project-visual\.peach \.project-cover\s*\{\s*object-position:\s*center top/);
   assert.match(page, /\{project\.name\} — Plataforma digital para confeitaria artesanal/);
   assert.match(page, /Organizar a apresentação dos produtos/);
   assert.match(page, /autenticação, operação do pedido e integrações de pagamento, incluindo PIX, não são apresentadas aqui como homologadas ou em produção/);
@@ -83,7 +137,11 @@ test('Pé de Moça case study separates demonstrated screens from integrations p
   assert.equal((model.match(/src:'\/assets\/projects\/pe-de-moca\//g) || []).length, 7);
   assert.match(vite, /projectImageFiles = \[/);
   assert.match(vite, /assets\/projects\/pe-de-moca\/\$\{fileName\}/);
-  assert.match(audit, /projectImageFiles\.length !== 7/);
+  assert.match(audit, /operationalProjectAssets/);
+  assert.match(audit, /operationalImagesValid/);
+  assert.match(ignore, /local-backup-port-preview-\*\//);
+  assert.match(ignore, /local-backup-port-preview-\*\.zip/);
+  assert.match(audit, /project\?\.image !== '\/assets\/projects\/pe-de-moca\/catalog-mobile\.webp'/);
   assert.match(audit, /function webpDimensions\(/);
   assert.match(audit, /projectImagesValid/);
 });
@@ -189,18 +247,22 @@ test('public routes and headers keep navigation and network restricted', () => {
   assert.equal(routeId('/projeto/pe-de-moca/'), 'pe-de-moca');
   assert.equal(routeId('/projeto/%E0%A4%A'), '__invalid_route__');
   assert.equal(projectPath('laboratorio'), '/projeto/laboratorio');
+  assert.equal(projectPath('conciliacnes'), '/projeto/conciliacnes');
+  assert.equal(projectPath('conversores-sus'), '/projeto/conversores-sus');
   assert.equal(currentPublicPath('/', '#/sobre'), '/estudio');
   assert.equal(currentPublicPath('/estudio/', ''), '/estudio');
   assert.equal(currentPublicPath('/projeto/pe-de-moca', ''), '/projeto/pe-de-moca');
   const documents = routeDocuments(showcase.projects);
   assert.deepEqual(documents.map(route => route.path), [
     '/projetos', '/estudio', '/servicos', '/contato', '/projeto/pe-de-moca', '/projeto/laboratorio',
+    '/projeto/conciliacnes', '/projeto/conversores-sus',
   ]);
-  assert.deepEqual(documents.map(route => route.title), Array(6).fill(PUBLIC_TITLE));
+  assert.deepEqual(documents.map(route => route.title), Array(8).fill(PUBLIC_TITLE));
   assert.ok(documents.every(route => route.url === `${PUBLIC_ORIGIN}${route.path}` && route.ogTitle && route.ogDescription));
   assert.deepEqual(publicDocumentFiles(showcase.projects), [
     'index.html', 'projetos/index.html', 'estudio/index.html', 'servicos/index.html', 'contato/index.html',
     'projeto/pe-de-moca/index.html', 'projeto/laboratorio/index.html',
+    'projeto/conciliacnes/index.html', 'projeto/conversores-sus/index.html',
   ]);
   assert.equal(safeUrl('javascript:void(0)'), '');
   const app = readFileSync(new URL('../vitrine/main.jsx', import.meta.url), 'utf8');

@@ -22,6 +22,26 @@ const projectImageDimensions = {
   'cart-desktop.webp': [1432, 852], 'account-desktop.webp': [1697, 877],
   'account-mobile.webp': [810, 1800],
 };
+const operationalProjectAssets = {
+  conciliacnes: {
+    cover: 'files-step.webp', icon: 'icon.webp',
+    images: {
+      'files-step.webp': [1440, 857], 'establishments-step.webp': [1439, 861],
+      'excel-report-step.webp': [1438, 858], 'icon.webp': [32, 32],
+    },
+  },
+  'conversores-sus': {
+    cover: 'home-portfolio.webp', icon: 'icon.webp',
+    images: {
+      'home-portfolio.webp': [1440, 856], 'apac-paciente-portfolio.webp': [1440, 858], 'apac-procedimentos-portfolio.webp': [1440, 846],
+      'biomega-bpac-portfolio.webp': [1440, 857], 'visa-bpac-portfolio.webp': [1440, 858], 'samu-bpac-portfolio.webp': [1440, 858],
+      'icon.webp': [512, 512],
+    },
+  },
+};
+function configDimensions(projectId, fileName) {
+  return operationalProjectAssets[projectId]?.images[fileName] || [];
+}
 const unsafeSvg = /<\s*(?:script|foreignObject|iframe|object|embed|image|use|animate(?:Motion|Transform)?|set|audio|video)\b|\bon[a-z0-9_-]+\s*=|\b(?:href|xlink:href|src)\s*=|\bstyle\s*=|url\s*\(|javascript:|data:/i;
 const decorativeStar = /[✳✱✻✼✽❋❊❉⁎∗＊]/u;
 
@@ -35,10 +55,18 @@ function isPng(buffer) {
 }
 
 function webpDimensions(buffer) {
-  if (buffer.length < 30 || buffer.toString('ascii', 0, 4) !== 'RIFF' ||
-      buffer.toString('ascii', 8, 12) !== 'WEBP' || buffer.toString('ascii', 12, 16) !== 'VP8 ' ||
-      buffer[23] !== 0x9d || buffer[24] !== 0x01 || buffer[25] !== 0x2a) return null;
-  return {width:buffer.readUInt16LE(26) & 0x3fff, height:buffer.readUInt16LE(28) & 0x3fff};
+  if (buffer.length < 25 || buffer.toString('ascii', 0, 4) !== 'RIFF' || buffer.toString('ascii', 8, 12) !== 'WEBP') return null;
+  const chunk = buffer.toString('ascii', 12, 16);
+  if (chunk === 'VP8 ' && buffer.length >= 30 && buffer[23] === 0x9d && buffer[24] === 0x01 && buffer[25] === 0x2a) {
+    return {width:buffer.readUInt16LE(26) & 0x3fff, height:buffer.readUInt16LE(28) & 0x3fff};
+  }
+  if (chunk === 'VP8L' && buffer[20] === 0x2f) {
+    return {width:1 + buffer[21] + ((buffer[22] & 0x3f) << 8), height:1 + ((buffer[22] >> 6) | (buffer[23] << 2) | ((buffer[24] & 0x0f) << 10))};
+  }
+  if (chunk === 'VP8X' && buffer.length >= 30) {
+    return {width:1 + buffer.readUIntLE(24, 3), height:1 + buffer.readUIntLE(27, 3)};
+  }
+  return null;
 }
 
 function jpegDimensions(buffer) {
@@ -95,13 +123,30 @@ try {
   const portraitAssets = assets.filter(name => /^leonardo-oliveira-[\w-]+\.webp$/.test(name));
   const publicContactIcons = assets.filter(name => contactIconFiles.includes(name));
   const project = showcase.projects.find(item => item.id === 'pe-de-moca');
+  const operationalProjects = showcase.projects.filter(item => ['conciliacnes', 'conversores-sus'].includes(item.id));
+  const operationalProjectsValid = operationalProjects.length === 2 &&
+    operationalProjects.map(item => item.id).join(',') === 'conciliacnes,conversores-sus' &&
+    operationalProjects.every(item => item.category === 'Automação' && item.year === '' && item.caseStudy &&
+      item.image === `/assets/projects/${item.id}/${operationalProjectAssets[item.id].cover}` &&
+      item.icon === `/assets/projects/${item.id}/${operationalProjectAssets[item.id].icon}` && item.gallery.length === Object.keys(operationalProjectAssets[item.id].images).length - 1 &&
+      item.gallery.every(image => image.src.startsWith(`/assets/projects/${item.id}/`) && image.alt && image.caption && image.width > 0 && image.height > 0) &&
+      !item.demoUrl && !item.repositoryUrl);
+  const operationalImageNames = Object.fromEntries(Object.entries(operationalProjectAssets).map(([id, config]) => [id, Object.keys(config.images)]));
+  const operationalGalleryNamesMatch = operationalProjects.every(item => {
+    const galleryNames = item.gallery.map(image => image.src.replace(`/assets/projects/${item.id}/`, '')).sort();
+    const expectedNames = operationalImageNames[item.id].filter(name => name !== 'icon.webp').sort();
+    return galleryNames.join(',') === expectedNames.join(',') && item.gallery.every(image => {
+      const [width, height] = configDimensions(item.id, image.src.split('/').at(-1));
+      return image.width === width && image.height === height;
+    });
+  });
   const projectGalleryNames = project?.gallery.map(image => image.src.replace('/assets/projects/pe-de-moca/', '')).sort() || [];
   if (assets.length !== 7 || !assets.includes('projects') || bundleAssets.length !== 2 || portraitAssets.length !== 1 ||
       publicContactIcons.length !== contactIconFiles.length ||
       !bundleAssets.some(name => name.endsWith('.js')) || !bundleAssets.some(name => name.endsWith('.css')) ||
       projectImageFiles.length !== 7 || new Set(projectImageFiles).size !== projectImageFiles.length ||
       projectGalleryNames.join(',') !== [...projectImageFiles].sort().join(',') ||
-      project?.image !== '/assets/projects/pe-de-moca/catalog-mobile.webp' ||
+      project?.image !== '/assets/projects/pe-de-moca/catalog-mobile.webp' || !operationalProjectsValid || !operationalGalleryNamesMatch ||
       project?.demoUrl !== 'https://delivery-pedemoca.pages.dev/' ||
       project?.repositoryUrl !== 'https://github.com/777McLovin777/delivery-pedemoca') {
     throw new Error('Conjunto de bundles inesperado.');
@@ -109,7 +154,8 @@ try {
   const documents = publicDocumentFiles(showcase.projects);
   const files = ['404.html', '_headers', ...faviconFiles, openGraphImageFile, ...documents,
     ...assets.filter(name => name !== 'projects').map(name => `assets/${name}`),
-    ...projectImageFiles.map(name => `assets/projects/pe-de-moca/${name}`)].sort();
+    ...projectImageFiles.map(name => `assets/projects/pe-de-moca/${name}`),
+    ...Object.entries(operationalImageNames).flatMap(([id, names]) => names.map(name => `assets/projects/${id}/${name}`))].sort();
   const directories = new Set(['assets']);
   for (const name of files) {
     let parent = posix.dirname(name);
@@ -134,6 +180,14 @@ try {
   const projectImagesValid = projectImageBuffers.every((buffer, index) => {
     const dimensions = webpDimensions(buffer);
     const [width, height] = projectImageDimensions[projectImageFiles[index]];
+    return dimensions?.width === width && dimensions?.height === height && buffer.length < 1_000_000;
+  });
+  const operationalImageBuffers = Object.entries(operationalImageNames).flatMap(([id, names]) => names.map(name => ({
+    id, name, buffer:readFileSync(join(root, 'assets', 'projects', id, name)),
+  })));
+  const operationalImagesValid = operationalImageBuffers.every(({id, name, buffer}) => {
+    const dimensions = webpDimensions(buffer);
+    const [width, height] = operationalProjectAssets[id].images[name];
     return dimensions?.width === width && dimensions?.height === height && buffer.length < 1_000_000;
   });
   const openGraphDimensions = jpegDimensions(openGraphImage);
@@ -178,16 +232,18 @@ try {
       !openGraphDimensions || openGraphDimensions.width !== 1200 || openGraphDimensions.height !== 630 || openGraphImage.length > 500000 ||
       !exactMeta || /property="og:|name="twitter:/i.test(notFound) ||
       !projectImagesValid || projectImageBuffers.reduce((total, image) => total + image.length, 0) > 2_000_000 ||
+      !operationalImagesValid || operationalImageBuffers.reduce((total, image) => total + image.buffer.length, 0) > 1_500_000 ||
       decorativeStar.test(publicText) ||
       htmlDocuments.some(html => faviconLinks.some(link => !html.includes(link))) ||
       !bundleAssets.every(name => index.includes('/assets/' + name)) ||
       !script.includes('/assets/' + portraitAssets[0]) ||
       projectImageFiles.some(name => !script.includes(`/assets/projects/pe-de-moca/${name}`)) ||
+      operationalImageBuffers.some(({id, name}) => !script.includes(`/assets/projects/${id}/${name}`)) ||
       contactIconFiles.some(name => !script.includes(`/assets/${name}`)) ||
       routeHtml.some(({html}) => !bundleAssets.every(name => html.includes('/assets/' + name))) ||
       publicContacts.some(value => !script.includes(value)) ||
       !script.includes(project.demoUrl) || !script.includes(project.repositoryUrl) ||
-      /supabase\.co|storage:\/\/|#\/admin|VITE_|contato@exemplo\.com|delivery-pedemoca\.pages\.dev|atelier_portfolio_v1_data|sb_(?:secret|publishable)_|doceconecta|doce conecta|doce-conecta/i.test(publicTextWithoutApprovedDemoUrl)) {
+      /supabase\.co|storage:\/\/|#\/admin|VITE_|contato@exemplo\.com|delivery-pedemoca\.pages\.dev|atelier_portfolio_v1_data|sb_(?:secret|publishable)_|doceconecta|doce conecta|doce-conecta|C:\\\\MCLOVIN|C:\\\\Users\\\\Saude4|Saude4\\\\Documents/i.test(publicTextWithoutApprovedDemoUrl)) {
     throw new Error('Referência privada, proteção ausente ou bundle não referenciado.');
   }
   const manifest = files.map(name => `${createHash('sha256').update(readFileSync(join(root, name))).digest('hex')}  dist-vitrine/${name}`).join('\n') + '\n';
